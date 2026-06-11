@@ -1,0 +1,9 @@
+textblob
+mysql-connector-python
+matplotlib
+Pillow
+tkcalendar
+tkinterPdfViewer
+openai
+keras
+scipy
