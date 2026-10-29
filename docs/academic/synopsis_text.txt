@@ -1,0 +1,519 @@
+--- PAGE 1 ---
+A
+MINOR PROJECT SYNOPSIS
+BhagvadMood Journal
+(An AI-Powered Mental Health Platform Integrating NLP and Vedic
+Wisdom for Emotional Well-being)
+Submitted in partial fulfilment of the requirements for the award
+of the degree of B.Tech in Computer Science and Engineering
+Submitted By :
+Chahat Modi
+(Registration No. : 23BCON0775)
+Under the Supervision of
+Dr. Jitender Kumar
+(Assistant Professor)
+Department of Computer Science & Engineering
+Session: 2026-27
+JECRC University, Jaipur
+
+--- PAGE 2 ---
+TABLE OF CONTENTS
+S. No.
+Content
+Page No.
+1
+Introduction
+1-2
+1.1
+Problem Statement
+1.2
+Overview
+1.3
+Objective
+1.4
+Solution
+2
+Feasibility Study
+3-4
+2.1
+Need
+2.2.1 Target Audience
+2.2
+Significance
+2.3
+Feasibility
+3
+Project Features
+5-10
+4
+Tools, Technologies and System Requirements
+11-12
+4.1
+Tools and Technologies Used
+4.2
+Hardware Requirements
+4.3
+Software Requirement
+4.4
+Functional Requirements
+4.5
+Non Functional Requirements
+5
+Work Plan and Methodology
+13
+5.1 Methodology
+5.2 Project Timeline
+5.3 Roles and Responsibilities
+6
+Conclusion
+14
+
+--- PAGE 3 ---
+1
+1. INTRODUCTION
+1. INTRODUCTION
+1.1. Problem Statement
+Many individuals face significant challenges in identifying, tracking, and effectively
+reflecting on their emotional states during daily life. Current digital journaling tools often
+lack the necessary personalization and cultural relevance, leading to low user engagement
+and limited emotional growth. Furthermore, existing applications frequently fail to detect
+critical crisis moments or provide specialized support for specific demographics, such as
+women’s health tracking. A research gap identified through the study of over five
+academic papers highlights that most sentiment analysis models are trained on social
+media data rather than private entries, reducing their accuracy in detecting genuine
+depressive patterns.
+1.2 Overview
+The BhagvadMood Journal (also known as SarathiApp) is a comprehensive, full-stack,
+emotion-aware spiritual companion designed to bridge the gap between modern wellness
+technology and ancient Vedic wisdom. Developed as an offline desktop application, it
+provides a secure and private environment for users to document their thoughts without
+the privacy concerns associated with cloud-based platforms. The system functions as a
+holistic wellness tool that integrates mental health tracking with physical health
+monitoring, specifically addressing the intersection of hormonal cycles and emotional
+well-being.
+1.3 Objectives
+The primary goals of this project are:
+
+To build a robust Tkinter-based desktop application for daily emotional
+journaling.
+
+To utilize Natural Language Processing (NLP) through TextBlob to accurately
+classify user moods from raw text inputs.
+
+--- PAGE 4 ---
+2
+
+To provide spiritually resonant guidance by mapping detected moods to specific
+Bhagavad Gita shlokas and positive cognitive reframes.
+
+To implement specialized tracking for the female menstrual cycle, including
+symptoms, flow, and energy levels, to offer holistic health insights.
+
+To enhance user engagement through gamified features like the "Spin Wheel" for
+motivational boosts and a structured To-Do list for task clarity.
+
+To ensure data privacy through a localized MySQL database, allowing for offline
+statistics and entry management.
+1.4 Solution
+The BhagvadMood Journal provides a personalized, offline solution that uses advanced
+sentiment analysis to contextualize a user's emotional state. Unlike generic tools, it offers
+a "Safety-First" approach with hardcoded, priority regex-based crisis detection to
+immediately redirect users in distress to helplines. By automating the "emotion
+reframing" process through the lens of the Bhagavad Gita, the application offers a unique,
+culturally tailored support system that fosters resilience and self-reflection. The
+integration of physical health logs and visual mood analytics ensures a complete holistic
+view of the user’s well-being.
+
+--- PAGE 5 ---
+3
+2. FEASIBILITY STUDY
+2.1.1 Need: Many individuals struggle to identify, track, and reflect on their emotional
+states in daily life. While existing tools often lack personalization, offline availability,
+cultural relevance, and the ability to detect crisis moments during user entries which leads
+to low user engagement and limited emotional growth. Furthermore, there is a significant
+demand for specialized, culturally relevant support tailored to specific user demographics,
+such as integrated tracking for women's health.
+2.1.2 Target Audience:
+Students: Individuals managing academic stress who require
+task clarity and
+motivational engagement.
+Professionals: Users seeking a private tool to manage work-life balance and emotional
+trends.
+Women: Specific demographics requiring integrated tracking for physical symptoms and
+hormonal influences on mood.
+Counsellors: Mental health professionals utilizing a dedicated dashboard to view
+anonymous patient histories for better context.
+2.2 Significance: This system brings transparency to personal emotional trends,
+provides digital records for stakeholders, and makes spiritual support easily accessible
+2.3 Feasibility:
+
+Technical Feasibility: The project is developed using widely used Python
+libraries (Tkinter, TextBlob) and MySQL, ensuring a robust and well-documented
+environment for offline data management.. All required tools are freely available
+or low-cost.
+
+Operational Feasibility: The interface is kept simple and user-friendly so that
+even users with basic computer knowledge (or with help from local facilitators)
+can operate it.
+
+--- PAGE 6 ---
+3
+
+Economic
+Feasibility:
+As
+an
+offline,
+desktop-based
+academic
+project,
+development and deployment costs are minimal, utilizing local hardware without
+cloud subscription fees. It can later be hosted on free/low-cost platforms or
+utilized as a standalone desktop application.
+
+--- PAGE 7 ---
+5
+3. PROJECT FEATURES
+The system includes the following key features categorized by user roles and system
+capabilities:
+User Roles & Registration:
+
+Admin Module:
+o
+Manages overall system operations and user activities
+o
+Ensures database security and access control
+o
+Monitors platform performance and integrity
+
+User Module:
+o
+Secure registration and login system
+o
+Categorized access for Students, Professionals, and Non-professionals
+o
+Personalized experience based on user type
+
+Counselor Module:
+o
+Allows verified professionals to register on the platform
+o
+Enables interaction with users for emotional support
+o
+Maintains authentication and professional credibility
+User Features:
+
+AI-Powered Sentiment Analysis (USP):
+o
+Analyzes user-written thoughts using TextBlob
+o
+Classifies emotions (e.g., anxious, sad, peaceful)
+o
+Handles sarcasm and negation for better accuracy
+
+Active Emotion Reframing (USP):
+
+--- PAGE 8 ---
+6
+o
+Identifies negative thought patterns
+o
+Suggests positive and constructive alternatives
+o
+Helps improve emotional mindset
+
+Vedic Guidance Integration:
+o
+Maps emotions to Bhagavad Gita verses
+o
+Provides meaningful interpretations
+o
+Offers culturally relevant spiritual guidance
+
+Integrated Period Journal (USP):
+o
+Tracks daily physical symptoms and flow intensity
+o
+Records energy levels and mood variations
+o
+Helps analyze hormonal impact on mental health
+
+Gamified Motivation:
+o
+Includes a “Spin Wheel” feature
+o
+Generates random motivational messages
+o
+Saves messages as journal entries for later reflection
+
+Task Clarity & Organization:
+o
+Provides a To-Do list feature
+o
+Includes time-based reminders
+o
+Helps users stay organized and productive
+
+Entries Management:
+o
+Allows users to search past entries
+o
+View and analyze emotional records
+o
+Helps track personal growth over time
+
+--- PAGE 9 ---
+7
+Admin & Counselor Features:
+
+Clinical Context Dashboard:
+o
+Displays anonymized user journal data
+o
+Helps counselors understand emotional patterns
+o
+Supports better session preparation
+
+Confidential Booking:
+o
+Secure appointment scheduling system
+o
+Allows approval, cancellation, and tracking
+o
+Ensures privacy of user data
+
+Slot Management:
+o
+Enables creation of available time slots
+o
+Allows modification of schedules
+o
+Improves appointment organization
+
+System Oversight:
+o
+Monitors platform usage and activities
+o
+Manages user and counselor accounts
+o
+Maintains system reliabilit
+Additional System-Wide Features:
+Privacy-First Offline Operation (USP):
+o
+Works without internet connectivity
+o
+Uses MySQL for local data storage
+o
+Ensures high data privacy and security
+
+--- PAGE 10 ---
+8
+
+Data Visualization:
+o
+Generates pie charts for mood distribution
+o
+Creates graphs for physical health tracking
+o
+Helps users understand patterns visually
+
+Knowledge & Resource Hub:
+o
+Provides self-care tips and wellness content
+o
+Includes health facts and book suggestions
+o
+Offers additional learning resources
+
+Secure Data Export:
+o
+Allows export of data in CSV format
+o
+Helps maintain personal backups
+o
+Can be shared with professionals if needed
+
+Crisis Handling:
+o
+Detects critical/emergency keywords using regex
+o
+Prioritizes sensitive entries
+o
+Redirects users to professional helplines
+
+--- PAGE 11 ---
+9
+ADMIN MODULE
+USER MODULE
+COUNSELLOR
+MODULE
+SYSTEMOVERSIGHT
+& MONITORING
+REGISTRATION &
+LOGIN
+COUNSELOR
+REGISTRATION
+MANAGE USERS &
+COUNSELLORS
+PERSONALISED
+EXPERIENCE
+USER INTERACTION
+& SUPPORT
+SECURITY & DB
+CONTROL
+USER FEATURES
+(CORE SYSTEM)
+DASHBOARD &
+SLOTS
+MANAGEMENT
+OFFLIE PRIVACY
+MODE
+RESOURCE HUB
+DATA EXPERT (CSV)
+CRISIS HANDLING
+SYSTEM START / USER
+CORE USER FEATURES
+AI SENTIMENT
+ANALYSIS
+EMOTION
+REFRAMING
+VEDIC GUIDANCE
+PERIOD JOURNAL
+GAMIFIED
+MOTIVATION
+TO-DO REMINDERS
+ENTRY
+MANAGEMENT
+DATA
+VISUALIZATION
+SYSTEM-WIDE FEATURES
+
+--- PAGE 12 ---
+11
+4. TOOLS, TECHNOLOGIES AND SYSTEM REQUIREMENTS
+4.1 Tools and Technologies Used:
+1.
+IDE: Visual Studio Code (VS Code)
+2.
+Frontend: Tkinter (Python).
+3.
+Backend: Python 3.x (Object-Oriented Programming, Regex).
+4.
+Natural Language Processing (NLP): TextBlob and NLTK.
+5.
+Database: MySQL Server and XAMPP/WAMP for local management
+6.
+Visualization: Matplotlib.
+7.
+Version Control: Git & GitHub.
+8.
+Other Tools: tkinterPdfViewer (for scripture integration) and the CSV module (for
+data export).
+4.2 Hardware Requirements:
+1.
+Processor: AMD Ryzen 7 5825U or Intel Core i5
+2.
+RAM: 16 GB or higher
+3.
+Storage: 256 GB or 512 GB SSD or more.
+4.
+Internet Connection: Not required for the end user (Offline Operation); required
+only for project development, testing, and debugging.
+4.3 Software Requirements:
+1.
+Operating System: Windows 10 / 11 (64-bit).
+2.
+Database Environment: MySQL Server and XAMPP/WAMP for local management.
+
+--- PAGE 13 ---
+11
+3.
+Python Environment: Python 3.10+ with required libraries installed via pip
+(TextBlob, mysql-connector-python, Matplotlib, tkcalendar).
+4.4 Functional Requirements
+1. Multi-Role Access: Users, Admins, and Counsellors must be able to register and
+login through dedicated secure paths.
+2. Automated Mood Analysis: The system must accurately classify thoughts and map
+them to specific Bhagavad Gita verses.
+3. Integrated Physical Tracking: Female users must be able to log symptoms, flow,
+and energy levels within the Period Journal.
+4. Secure Offline Storage: All personal entries and patient histories must be maintained
+in a secure local database with proper audit trails.
+4.5 Non-Functional Requirements
+5. Privacy-First Design: The application must operate entirely offline to ensure data
+confidentiality.
+6. Responsive UI: The modular frame interface must be user-friendly and aesthetically
+consistent with gradient themes.
+7. Reliability: Regex-based crisis detection must have priority execution for immediate
+user safety.
+
+--- PAGE 14 ---
+12
+5. WORK PLAN & METHODOLOGY
+5.1 Methodology: The project follows a modular development approach:
+I.
+Registration and profile management for users and counsellors
+II.
+AI-based sentiment analysis and mood detection module
+III.
+Emotion-to-shloka mapping for spiritual guidance
+IV.
+Wellness tracking with integrated period journal
+V.
+Database connectivity and journal history management (MySQL)
+VI.
+Gamification and task management (Spin Wheel & To-Do list)
+VII.
+Data visualization and mood trend analysis
+5.2 Project Timeline (August – December 2025)
+5.3 Role & Responsibilities:
+
+Chahat Modi: Chahat Modi: Research Gap Identification, Backend development,
+frontend design (Tkinter UI), database connectivity (MySQL), AI-based sentiment
+analysis implementation, feature integration (emotion reframing, shloka mapping,
+wellness tracking), and project documentation
+
+--- PAGE 15 ---
+13
+6. CONCLUSION
+The BhagvadMood Journal (SarathiApp) serves as a much-needed digital solution to the
+longstanding problem of generic and culturally detached mental health tools. By providing a
+transparent, offline platform, the system ensures high data privacy while reducing the risk of
+crisis moments going undetected through priority regex-based safety protocols.
+This minor project demonstrates the practical application of Computer Science and
+Engineering principles—specifically Natural Language Processing (NLP) and Database
+Management—in solving real-world wellness issues. It fills a critical research gap by
+moving beyond simple rule-based systems to provide culturally resonant insights that
+contextualize emotional states via Bhagavad Gita wisdom.
+The system has strong potential for future enhancements, including:
+
+LLM-Powered Conversational Support: Integrating agents like Gemini for
+dynamic, empathetic user interactions.
+
+Cloud Synchronization: Enabling cross-platform integration and secure clinician
+access.
+
+Advanced Mood Prediction: Utilizing deep learning models for context-aware
+emotional detection.
+
+Wearable Integration: Capturing physical stress data from smart devices for a more
+holistic health analysis.
+By blending ancient tradition with modern technology, this project provides a scalable and
+interactive foundation for holistic personal growth and emotional resilie
+
+--- PAGE 16 ---
+14
+References
+1. https://www.researchgate.net/publication/391802393_Sentiment_Analysis_for_Menta
+l_Health_Challenges_and_Opportunities
+2. https://github.com/Jhalak19y/MindLens_AI_Mental_Health_Analyzer
+3. https://research-
+archive.org/index.php/rars/preprint/view/1632?utm_source=chatgpt.com
+4. https://en.wikipedia.org/wiki/Global_mental_health?utm_source=chatgpt.com
+5. Bhatia, S. C., & Bhatia, S. K. (2005). The Bhagavad Gita: A precursor to modern
+psychotherapy? This paper explores how the dialogue between Krishna and Arjuna
+mirrors modern counseling.
+6. IJPsy-41-5.pdf Mental Health in Ancient India & Its Relevance to Modern Psychiatry.
+Focuses Historical context of mental wellness in India.
+7. Wysa: Everyday Mental Health, "Wysa: AI-driven mental health support," 2026.
+[Online]. Available: https://www.wysa.io/

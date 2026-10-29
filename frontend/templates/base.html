@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sarathi — Bhagvad Mood Journal{% endblock %}</title>
+    
+    <!-- Instant Theme Initializer to prevent flash of wrong theme -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Interactive Analytics & Trend Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --font-main: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+            --font-sub: 'Inter', sans-serif;
+            --font-serif: 'Newsreader', 'Georgia', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            transition: background 1s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+        }
+
+        /* Mobile Header / Quick Controls */
+        .mobile-header-bar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: var(--card-bg-translucent);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 200;
+            padding: 0 1.2rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.55rem 0.85rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--sidebar-border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.4rem;
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.8rem;
+            text-decoration: none;
+        }
+
+        .logo-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .logo-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+        }
+
+        .stats-widget {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.1rem;
+            margin-bottom: 1.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: var(--font-sub);
+            font-size: 0.92rem;
+            color: var(--text-primary);
+        }
+
+        .stat-icon-points {
+            color: #f59e0b;
+        }
+
+        .stat-icon-streak {
+            color: #ef4444;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 0.3rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--accent-sage-light);
+            transform: translateX(3px);
+        }
+
+        .nav-link.active {
+            color: var(--accent-primary);
+            background: var(--accent-sage-light);
+            border-left: 3px solid var(--accent-primary);
+            font-weight: 700;
+        }
+
+        .nav-link i {
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--sidebar-border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Main Content Panel */
+        .main-panel {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2.5rem 3.5rem;
+            min-height: 100vh;
+            max-width: calc(100vw - var(--sidebar-width));
+            width: 100%;
+        }
+
+        /* Global UI Elements */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 2rem;
+            box-shadow: var(--box-shadow-card);
+            margin-bottom: 2rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Flash Notifications */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem 1.4rem;
+            border-radius: 14px;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            animation: slideIn 0.3s ease forwards;
+            font-family: var(--font-main);
+        }
+
+        .alert-success {
+            background: rgba(5, 150, 105, 0.12);
+            border: 1px solid rgba(5, 150, 105, 0.35);
+            color: #047857;
+        }
+
+        [data-theme="night"] .alert-success {
+            background: rgba(0, 230, 118, 0.15);
+            border-color: #00e676;
+            color: #b9ffd9;
+        }
+
+        .alert-error {
+            background: rgba(225, 29, 72, 0.12);
+            border: 1px solid rgba(225, 29, 72, 0.35);
+            color: #be123c;
+        }
+
+        [data-theme="night"] .alert-error {
+            background: rgba(255, 23, 68, 0.15);
+            border-color: #ff1744;
+            color: #ffcbd4;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Button Styling */
+        .btn {
+            background: var(--accent-primary);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.98rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(40, 75, 63, 0.18);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px rgba(40, 75, 63, 0.26);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-sage-light);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .mobile-header-bar {
+                display: flex;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                padding-top: 5rem;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
+            }
+            .main-panel {
+                margin-left: 0;
+                max-width: 100vw;
+                padding: 5.5rem 1.4rem 2rem 1.4rem;
+            }
+        }
+    </style>
+    {% block style %}{% endblock %}
+</head>
+<body>
+
+    <!-- Mobile Header Bar with Hamburger & Theme Selector -->
+    <header class="mobile-header-bar">
+        <button class="mobile-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div class="logo-badge" style="width:28px; height:28px; font-size:1rem;">d</div>
+            <span style="font-weight:700; font-size:1.15rem; color:var(--text-primary);">SARATHI</span>
+        </div>
+        <button type="button" class="theme-toggle-btn" onclick="toggleSarathiTheme()" style="padding:0.45rem 0.8rem; font-size:0.8rem;" title="Toggle Day / Night">
+            <i class="fa-solid fa-sun" id="mobileThemeIcon"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="app-sidebar">
+        <a href="/" class="logo-container">
+            <div class="logo-badge">d</div>
+            <span class="logo-text">SARATHI</span>
+        </a>
+
+        {% if session.get('role') in ['student', 'user', 'professional', 'non-professional', 'admin'] %}
+        <div class="stats-widget">
+            {% if session.get('active_profile_name') and session.get('active_profile_name') != session.get('username') %}
+            <div class="stat-item" style="border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-user-tag" style="color:var(--accent-primary);"></i>
+                <span style="font-size:0.85rem;">Managing: <strong>{{ session.get('active_profile_name') }}</strong> ({{ session.get('active_relationship', 'Dependent') }})</span>
+            </div>
+            {% endif %}
+            <div class="stat-item">
+                <i class="fa-solid fa-fire stat-icon-streak"></i>
+                <span>Streak: <strong>{{ session.get('streak', 0) }} Days</strong></span>
+            </div>
+            <div class="stat-item">
+                <i class="fa-solid fa-circle-nodes stat-icon-points"></i>
+                <span>Points: <strong>{{ session.get('points', 0) }} MP</strong></span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="nav-links">
+            {% if session.get('role') == 'admin' %}
+                <!-- Admin has visibility of EVERYTHING -->
+                <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--accent-primary); margin:0.4rem 0.8rem 0.2rem 0.8rem;">
+                    Enterprise Governance
+                </div>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if active_tab == 'admin' %}active{% endif %}">
+                    <i class="fa-solid fa-gauge"></i> Admin Console
+                </a>
+                <a href="{{ url_for('counselor_dashboard') }}" class="nav-link {% if active_tab == 'counselor' %}active{% endif %}">
+                    <i class="fa-solid fa-user-doctor"></i> Counselor Console
+                </a>
+
+                <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin:0.8rem 0.8rem 0.2rem 0.8rem;">
+                    User Portals & Hubs
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if active_tab == 'chatbot' %}active{% endif %}">
+                    <i class="fa-solid fa-brain"></i> AI Chatbot / Journal
+                </a>
+                <a href="{{ url_for('period') }}" class="nav-link {% if active_tab == 'period' %}active{% endif %}">
+                    <i class="fa-solid fa-venus"></i> Period Wellness
+                </a>
+                <a href="{{ url_for('forum') }}" class="nav-link {% if active_tab == 'forum' %}active{% endif %}">
+                    <i class="fa-solid fa-comments"></i> Peer Support Forum
+                </a>
+                <a href="{{ url_for('screenings') }}" class="nav-link {% if active_tab == 'screenings' %}active{% endif %}">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Screenings / Assess
+                </a>
+                <a href="{{ url_for('resources') }}" class="nav-link {% if active_tab == 'resources' %}active{% endif %}">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Recommendations
+                </a>
+                <a href="{{ url_for('booking') }}" class="nav-link {% if active_tab == 'booking' %}active{% endif %}">
+                    <i class="fa-solid fa-calendar-check"></i> Counselor Bookings
+                </a>
+                <a href="{{ url_for('todo') }}" class="nav-link {% if active_tab == 'todo' %}active{% endif %}">
+                    <i class="fa-solid fa-list-check"></i> To-Do Notes
+                </a>
+                <a href="{{ url_for('spinwheel') }}" class="nav-link {% if active_tab == 'spinwheel' %}active{% endif %}">
+                    <i class="fa-solid fa-spinner"></i> Spin Wheel
+                </a>
+                <a href="{{ url_for('export_data', format='csv') }}" class="nav-link">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </a>
+
+            {% elif session.get('role') == 'counselor' %}
+                <!-- Counselor Features Only -->
+                <a href="{{ url_for('counselor_dashboard') }}" class="nav-link active">
+                    <i class="fa-solid fa-user-doctor"></i> My Bookings & Slots
+                </a>
+                <a href="{{ url_for('counselor_dashboard') }}#permitted-clients" class="nav-link">
+                    <i class="fa-solid fa-folder-open"></i> Permitted Client Records
+                </a>
+
+            {% else %}
+                <!-- Student / General Person Features Only (No Admin or Counselor access) -->
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if active_tab == 'chatbot' %}active{% endif %}">
+                    <i class="fa-solid fa-brain"></i> AI Chatbot / Journal
+                </a>
+                <a href="{{ url_for('period') }}" class="nav-link {% if active_tab == 'period' %}active{% endif %}">
+                    <i class="fa-solid fa-venus"></i> Period Wellness
+                </a>
+                <a href="{{ url_for('forum') }}" class="nav-link {% if active_tab == 'forum' %}active{% endif %}">
+                    <i class="fa-solid fa-comments"></i> Peer Support Forum
+                </a>
+                <a href="{{ url_for('screenings') }}" class="nav-link {% if active_tab == 'screenings' %}active{% endif %}">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Screenings / Assess
+                </a>
+                <a href="{{ url_for('resources') }}" class="nav-link {% if active_tab == 'resources' %}active{% endif %}">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Recommendations
+                </a>
+                <a href="{{ url_for('booking') }}" class="nav-link {% if active_tab == 'booking' %}active{% endif %}">
+                    <i class="fa-solid fa-calendar-check"></i> Book Counselor & Share
+                </a>
+                <a href="{{ url_for('todo') }}" class="nav-link {% if active_tab == 'todo' %}active{% endif %}">
+                    <i class="fa-solid fa-list-check"></i> To-Do Notes
+                </a>
+                <a href="{{ url_for('spinwheel') }}" class="nav-link {% if active_tab == 'spinwheel' %}active{% endif %}">
+                    <i class="fa-solid fa-spinner"></i> Spin Wheel
+                </a>
+                <a href="{{ url_for('export_data', format='csv') }}" class="nav-link">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-footer">
+            <!-- Theme Selector Dropdown in Sidebar Footer -->
+            <div class="theme-selector-wrapper" style="width:100%; margin-bottom:0.4rem;">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemeDropdown(event)" style="width:100%; justify-content:center;" title="Choose Color Theme">
+                    <i class="fa-solid fa-sun" id="themeToggleIcon"></i>
+                    <span id="themeToggleText">Daylight Mode</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; opacity:0.6; margin-left:3px;"></i>
+                </button>
+                <div class="theme-dropdown-menu" id="themeDropdownMenu" style="bottom: calc(100% + 8px); top: auto; right: 0; left: 0;">
+                    <button type="button" class="theme-option-item active" data-theme-val="daylight" onclick="setSarathiTheme('daylight')">
+                        <span class="theme-color-dot" style="background:#284b3f;"></span>
+                        <span>Daylight (Sage)</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="amber" onclick="setSarathiTheme('amber')">
+                        <span class="theme-color-dot" style="background:#b45309;"></span>
+                        <span>Warm Amber</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="night" onclick="setSarathiTheme('night')">
+                        <span class="theme-color-dot" style="background:#8c52ff;"></span>
+                        <span>Midnight Cosmic</span>
+                    </button>
+                </div>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="nav-link" style="color: #ef4444; justify-content:center;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-panel">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Core Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block script %}{% endblock %}
+</body>
+</html>

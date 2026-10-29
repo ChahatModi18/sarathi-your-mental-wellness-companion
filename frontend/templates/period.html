@@ -1,0 +1,1703 @@
+{% extends "base.html" %}
+
+{% block title %}Period Journal & Menstrual Wellness — Sarathi{% endblock %}
+
+{% block style %}
+<style>
+    .period-header {
+        margin-bottom: 1.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+
+    .period-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.5px;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    .form-group label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .period-control {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 14px;
+        padding: 0.8rem 1.1rem;
+        color: var(--text-primary);
+        font-family: var(--font-main);
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+    }
+
+    .period-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(40, 75, 63, 0.12);
+    }
+
+    /* 4-Card Responsive Metric Strip */
+    .stats-grid-4 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        box-shadow: var(--box-shadow-card);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-primary);
+    }
+
+    .stat-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+
+    .stat-number {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-top: 0.35rem;
+        font-family: var(--font-main);
+    }
+
+    .stat-sub {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Main Responsive Layout */
+    .period-layout {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+        .period-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cycle and Wellness Log Cards */
+    .cycle-card-item {
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cycle-card-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .badge-cycle-len {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        background: var(--accent-sage-light);
+        color: var(--accent-primary);
+        border: 1px solid rgba(40, 75, 63, 0.15);
+    }
+
+    /* Mood Multi-Select Grid */
+    .mood-toggle-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.55rem;
+        margin-top: 0.4rem;
+    }
+
+    .mood-checkbox-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.55rem 0.65rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        user-select: none;
+    }
+
+    .mood-checkbox-label input {
+        display: none;
+    }
+
+    .mood-checkbox-label.selected {
+        border-color: var(--accent-primary);
+        background: var(--accent-sage-light);
+        color: var(--accent-primary);
+        box-shadow: 0 2px 8px rgba(40, 75, 63, 0.12);
+    }
+
+    /* Condition Tag Badges */
+    .condition-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-secondary);
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .condition-chip input {
+        display: none;
+    }
+
+    .condition-chip.active {
+        border-color: #ec4899;
+        background: rgba(236, 72, 153, 0.12);
+        color: #be185d;
+        font-weight: 700;
+    }
+
+    /* Shloka Reflection Card */
+    .shloka-reflection-card {
+        background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(40, 75, 63, 0.06) 100%);
+        border: 1px solid rgba(217, 119, 6, 0.25);
+        border-radius: 16px;
+        padding: 1.2rem 1.4rem;
+        margin-top: 1rem;
+        margin-bottom: 1.2rem;
+        position: relative;
+    }
+
+    /* Responsive Form Row */
+    .period-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+        .period-form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+    }
+
+    /* Tab Switcher for Right Panel */
+    .view-toggle-bar {
+        display: flex;
+        background: var(--input-bg);
+        padding: 0.35rem;
+        border-radius: 14px;
+        border: 1px solid var(--card-border);
+        margin-bottom: 1.2rem;
+        gap: 0.35rem;
+        overflow-x: auto;
+    }
+
+    .view-toggle-btn {
+        flex: 1;
+        min-width: 110px;
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.84rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .view-toggle-btn.active {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Phase Banner Styling */
+    .phase-banner {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.5rem 1.8rem;
+        margin-bottom: 1.8rem;
+        box-shadow: var(--box-shadow-card);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .phase-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    /* Modal Backdrop */
+    .sarathi-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+    }
+
+    .sarathi-modal-dialog {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        max-width: 680px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 2.2rem;
+        box-shadow: 0 20px 48px rgba(0,0,0,0.25);
+        position: relative;
+    }
+
+    @media (max-width: 768px) {
+        .period-title { font-size: 1.8rem; }
+        .period-header { flex-direction: column; align-items: stretch; }
+        .stats-grid-4 { grid-template-columns: 1fr; }
+        .mood-toggle-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Period Page Header -->
+<div class="period-header">
+    <div>
+        <h1 class="period-title"><i class="fa-solid fa-venus" style="color: #ec4899; margin-right: 0.4rem;"></i> Period Journal & Menstrual Wellness</h1>
+        <p style="color:var(--text-secondary); font-size:1.05rem; max-width:780px;">
+            Hormonal phase biofeedback, clinical condition management (PCOS, PMDD, PMS, Endometriosis), pain tracking, and compassionate Vedic equanimity.
+        </p>
+    </div>
+    <div style="display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap;">
+        <button type="button" class="btn btn-secondary" onclick="openPmddModal()" style="font-size:0.88rem; padding:0.65rem 1.15rem;">
+            <i class="fa-solid fa-brain" style="color:#ec4899;"></i> <span>PMDD Screener</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="openPcosModal()" style="font-size:0.88rem; padding:0.65rem 1.15rem;">
+            <i class="fa-solid fa-stethoscope" style="color:#8b5cf6;"></i> <span>PCOS Screener</span>
+        </button>
+        <a href="{{ url_for('api_period_export') }}" class="btn btn-secondary" style="font-size:0.88rem; padding:0.65rem 1.15rem;" title="Export clinical cycle history to RFC 4180 CSV">
+            <i class="fa-solid fa-file-csv"></i> <span>Export CSV</span>
+        </a>
+    </div>
+</div>
+
+<!-- Caregiver & Male Ally Portal Banner -->
+{% if is_caregiver_mode or is_male %}
+<div style="background:var(--card-bg); border:1.5px solid var(--accent-primary); border-radius:18px; padding:1.4rem 1.8rem; margin-bottom:1.6rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 8px 24px rgba(40,75,63,0.06);">
+    <div style="display:flex; align-items:center; gap:1.2rem;">
+        <div style="width:52px; height:52px; border-radius:16px; background:var(--accent-sage-light); color:var(--accent-primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+            <i class="fa-solid fa-hand-holding-heart"></i>
+        </div>
+        <div>
+            <h3 style="font-size:1.18rem; color:var(--text-primary); margin-bottom:0.25rem;">
+                Caregiver & Male Ally Portal: Supporting Women in Your Life
+            </h3>
+            <p style="font-size:0.9rem; color:var(--text-secondary); margin:0;">
+                Track cycles, monitor discomforts, record pain severity, and provide mindful support for your partner, daughter, sister, or family member.
+            </p>
+        </div>
+    </div>
+    <button type="button" class="btn" onclick="openAddProfileModal()" style="font-size:0.88rem; padding:0.6rem 1.15rem;">
+        <i class="fa-solid fa-user-plus"></i> Add Woman to Support
+    </button>
+</div>
+{% endif %}
+
+<!-- Multi-Profile Switcher Ribbon -->
+{% if profiles %}
+<div style="display:flex; align-items:center; gap:0.65rem; overflow-x:auto; margin-bottom:1.6rem; padding:0.4rem 0;">
+    <span style="font-weight:700; font-size:0.88rem; color:var(--text-secondary); white-space:nowrap;">
+        <i class="fa-solid fa-users"></i> Managing For:
+    </span>
+    <a href="{{ url_for('period') }}" style="padding:0.45rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600; text-decoration:none; background:{% if not active_profile %}var(--accent-primary){% else %}var(--input-bg){% endif %}; color:{% if not active_profile %}#ffffff{% else %}var(--text-primary){% endif %}; border:1px solid var(--card-border);">
+        {% if is_male %}All Family Records{% else %}Myself (Personal){% endif %}
+    </a>
+    {% for prof in profiles %}
+    <a href="{{ url_for('period', profile_id=prof[0]) }}" style="padding:0.45rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600; text-decoration:none; background:{% if active_profile and active_profile[0] == prof[0] %}var(--accent-primary){% else %}var(--input-bg){% endif %}; color:{% if active_profile and active_profile[0] == prof[0] %}#ffffff{% else %}var(--text-primary){% endif %}; border:1px solid var(--card-border);">
+        {{ prof[1] }} <span style="font-size:0.75rem; opacity:0.85;">({{ prof[2] }})</span>
+    </a>
+    {% endfor %}
+    <button type="button" onclick="openAddProfileModal()" style="background:var(--input-bg); border:1px dashed var(--accent-primary); color:var(--accent-primary); padding:0.45rem 0.9rem; border-radius:20px; font-size:0.85rem; font-weight:600; cursor:pointer;">
+        <i class="fa-solid fa-plus"></i> Add Profile
+    </button>
+</div>
+{% endif %}
+
+<!-- Biological Cycle Phase Biofeedback Banner -->
+{% if current_phase %}
+<div class="phase-banner" style="border-left: 6px solid {{ current_phase.color }};">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+        <div style="display:flex; align-items:center; gap:0.9rem;">
+            <div style="width:48px; height:48px; border-radius:14px; background:{{ current_phase.bg_color }}; color:{{ current_phase.color }}; display:flex; align-items:center; justify-content:center; font-size:1.4rem;">
+                <i class="fa-solid {{ current_phase.icon }}"></i>
+            </div>
+            <div>
+                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                    <span class="phase-pill" style="background:{{ current_phase.bg_color }}; color:{{ current_phase.color }}; border:1px solid {{ current_phase.color }}40;">
+                        {{ current_phase.phase }} • {{ current_phase.sub_phase }}
+                    </span>
+                    <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">
+                        {{ current_phase.day_range }}
+                    </span>
+                </div>
+                <h3 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin-top:0.3rem;">
+                    {{ current_phase.energy_state }}
+                </h3>
+            </div>
+        </div>
+        <div style="background:var(--input-bg); border:1px solid var(--card-border); border-radius:14px; padding:0.5rem 0.9rem; font-size:0.85rem; color:var(--text-secondary);">
+            <strong style="color:var(--text-primary);">Hormonal State:</strong> {{ current_phase.hormones }}
+        </div>
+    </div>
+
+    <!-- 3 Biofeedback Columns -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.2rem; margin-top:1.2rem; padding-top:1.2rem; border-top:1px solid var(--card-border);">
+        <div style="background:var(--input-bg); border-radius:14px; padding:1rem 1.1rem; border:1px solid var(--card-border);">
+            <div style="font-size:0.8rem; font-weight:700; color:var(--accent-primary); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:0.35rem;">
+                <i class="fa-solid fa-apple-whole"></i> Nourishment & Hydration
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-primary); margin:0; line-height:1.5;">
+                {{ current_phase.nourishment }}
+            </p>
+        </div>
+        <div style="background:var(--input-bg); border-radius:14px; padding:1rem 1.1rem; border:1px solid var(--card-border);">
+            <div style="font-size:0.8rem; font-weight:700; color:var(--accent-primary); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:0.35rem;">
+                <i class="fa-solid fa-person-walking"></i> Movement & Rest
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-primary); margin:0; line-height:1.5;">
+                {{ current_phase.movement }}
+            </p>
+        </div>
+        <div style="background:var(--input-bg); border-radius:14px; padding:1rem 1.1rem; border:1px solid var(--card-border);">
+            <div style="font-size:0.8rem; font-weight:700; color:#d97706; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:0.35rem;">
+                <i class="fa-solid fa-om"></i> Mindful Vedic Equanimity
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-primary); margin:0; font-style:italic; line-height:1.5;">
+                "{{ current_phase.mindful_wisdom }}"
+            </p>
+        </div>
+    </div>
+
+    {% if is_caregiver_mode or is_male %}
+    <div style="margin-top:1rem; background:rgba(40,75,63,0.06); border:1px solid var(--accent-primary); border-radius:12px; padding:0.85rem 1.1rem; display:flex; align-items:flex-start; gap:0.75rem;">
+        <i class="fa-solid fa-heart" style="color:var(--accent-primary); margin-top:3px;"></i>
+        <div style="font-size:0.88rem; color:var(--text-primary); line-height:1.5;">
+            <strong>Caregiver & Ally Guidance:</strong> {{ current_phase.caregiver_tip }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="period-layout">
+    <!-- Log Cycle & Daily Wellness Check-in Form -->
+    <div class="card" style="margin-bottom:0;">
+        <h2 style="font-size:1.4rem; margin-bottom:1.4rem; display:flex; align-items:center; gap:0.6rem;">
+            <i class="fa-solid fa-calendar-plus" style="color:var(--accent-primary);"></i>
+            <span>Daily Wellness & Cycle Log</span>
+        </h2>
+
+        <form action="{{ url_for('period') }}" method="POST" id="period-wellness-form">
+            <input type="hidden" name="profile_id" value="{{ active_profile[0] if active_profile else '' }}">
+            <input type="hidden" name="profile_name" value="{{ active_profile[1] if active_profile else ('Partner' if is_male else 'Self') }}">
+            <input type="hidden" name="relation_tag" value="{{ active_profile[2] if active_profile else ('Partner' if is_male else 'Self') }}">
+            
+            {% if active_profile %}
+            <div style="background:var(--accent-sage-light); border:1px solid var(--card-border); border-radius:12px; padding:0.65rem 1rem; margin-bottom:1.2rem; font-size:0.9rem; color:var(--text-primary); display:flex; align-items:center; gap:0.6rem;">
+                <i class="fa-solid fa-circle-check" style="color:var(--accent-primary);"></i>
+                <span>Logging check-in for: <strong>{{ active_profile[1] }} ({{ active_profile[2] }})</strong></span>
+            </div>
+            {% endif %}
+
+            <!-- Cycle Dates (Responsive Row) -->
+            <div class="period-form-row">
+                <div class="form-group">
+                    <label for="start_date"><i class="fa-regular fa-calendar"></i> Cycle Start Date *</label>
+                    <input type="date" name="start_date" id="start_date" class="period-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date"><i class="fa-regular fa-calendar-check"></i> Cycle End Date (Optional)</label>
+                    <input type="date" name="end_date" id="end_date" class="period-control">
+                </div>
+            </div>
+
+            <!-- Clinical Condition Tags (PCOS, PMDD, PMS, Endometriosis) -->
+            <div class="form-group">
+                <label><i class="fa-solid fa-dna" style="color:#ec4899;"></i> Clinical Diagnostic Tags (Select all that apply):</label>
+                <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.35rem;">
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PCOS">
+                        <i class="fa-solid fa-circle-dot"></i> PCOS / PCOD
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PMDD">
+                        <i class="fa-solid fa-brain"></i> PMDD
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PMS">
+                        <i class="fa-solid fa-leaf"></i> PMS
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="Endometriosis">
+                        <i class="fa-solid fa-shield-halved"></i> Endometriosis
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="Dysmenorrhea">
+                        <i class="fa-solid fa-fire-flame-curved"></i> Dysmenorrhea
+                    </label>
+                </div>
+            </div>
+
+            <!-- Mood Selection Checkbuttons (Touch Grid with Live Ambient Parity) -->
+            <div class="form-group">
+                <label><i class="fa-solid fa-face-smile"></i> Select Today's Mood(s) (Tap to activate mood ambience):</label>
+                <div class="mood-toggle-grid" id="moodToggleGrid">
+                    {% for m in ['peaceful', 'content', 'calm', 'anxious', 'restless', 'overwhelmed', 'sad', 'burned_out', 'happy', 'grateful', 'serene', 'lonely', 'angry', 'resilient', 'hopeful'] %}
+                    <label class="mood-checkbox-label" onclick="toggleMoodTag(this, '{{ m }}')" title="Click to select and view {{ m }} ambient theme">
+                        <input type="checkbox" name="moods" value="{{ m }}">
+                        <span>{{ m.replace('_', ' ').title() }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Dynamic Gita Verse Box -->
+            <div class="shloka-reflection-card" id="periodShlokBox">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">
+                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                        <i class="fa-solid fa-dharmachakra" style="color:#d97706; font-size:1.1rem;"></i>
+                        <strong style="font-size:0.85rem; text-transform:uppercase; color:#d97706; letter-spacing:0.5px;">Mindful Rhythm Reflection</strong>
+                    </div>
+                    <span id="periodWisdomMoodBadge" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--accent-primary);">General</span>
+                </div>
+                <div id="periodShlokText" style="font-family:'Newsreader', 'Georgia', serif; font-size:1.15rem; color:var(--text-primary); margin-bottom:0.45rem; line-height:1.5;">
+                    "Yoga is the journey of the self, through the self, to the self. Honor this phase of deep bodily intelligence."
+                </div>
+                <div id="periodShlokMeaning" style="font-size:0.88rem; color:var(--text-secondary); line-height:1.4;">
+                    Your hormones fluctuate like seasonal rivers. Steady breathing and gentleness anchor the mind.
+                </div>
+            </div>
+
+            <!-- Pain Severity Slider (VAS 0 to 10 Scale) -->
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="pain_score"><i class="fa-solid fa-heart-pulse" style="color:#ef4444;"></i> Pain & Cramp Severity (VAS 0 - 10):</label>
+                    <span id="painValueBadge" style="font-weight:700; color:#10b981; font-size:1.05rem;">0 / 10 (No Pain)</span>
+                </div>
+                <input type="range" name="pain_score" id="pain_score" min="0" max="10" value="0" class="period-control" style="padding:0; accent-color:var(--accent-primary); cursor:pointer;" oninput="updatePainBadge(this.value)">
+                <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-secondary); margin-top:0.25rem;">
+                    <span>0: None</span>
+                    <span>1-3: Mild</span>
+                    <span>4-6: Moderate</span>
+                    <span>7-8: Severe</span>
+                    <span>9-10: Incapacitating</span>
+                </div>
+            </div>
+
+            <!-- Physical Symptoms Textarea -->
+            <div class="form-group">
+                <label for="symptoms"><i class="fa-solid fa-notes-medical"></i> Describe Pain Locations or Somatic Symptoms</label>
+                <textarea name="symptoms" id="symptoms" class="period-control" placeholder="Pelvic cramps, lower back tightness, radiating thigh ache, nausea, headaches, bloating, breast sensitivity, fatigue..." style="min-height:95px; resize:vertical; font-size:0.95rem; line-height:1.6;"></textarea>
+            </div>
+
+            <!-- Flow & Texture Grid (Responsive Row) -->
+            <div class="period-form-row">
+                <div class="form-group">
+                    <label for="flow"><i class="fa-solid fa-droplet"></i> Flow Intensity</label>
+                    <select name="flow" id="flow" class="period-control">
+                        <option value="None">None (Pre / Post Window)</option>
+                        <option value="Spotting">Spotting / Very Light</option>
+                        <option value="Light">Light Flow</option>
+                        <option value="Normal" selected>Normal / Moderate</option>
+                        <option value="Heavy">Heavy Flow</option>
+                        <option value="Heavy with Clots">Heavy with Clotting</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="flow_texture"><i class="fa-solid fa-vial"></i> Flow / Fluid Texture</label>
+                    <select name="flow_texture" id="flow_texture" class="period-control">
+                        <option value="Standard" selected>Standard Flow</option>
+                        <option value="Thick / Clotted">Thick / Clotted</option>
+                        <option value="Watery / Thin">Watery / Thin</option>
+                        <option value="Brownish / Old">Brownish / Dark</option>
+                        <option value="Cervical Creamy">Cervical Creamy</option>
+                        <option value="Egg White (Fertile)">Egg White (Fertile)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Energy & Sleep Grid (Responsive Row) -->
+            <div class="period-form-row">
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label for="energy"><i class="fa-solid fa-bolt"></i> Vital Energy (1 to 10):</label>
+                        <span id="energyValueBadge" style="font-weight:700; color:var(--accent-primary); font-size:1rem;">5 / 10</span>
+                    </div>
+                    <input type="range" name="energy" id="energy" min="1" max="10" value="5" class="period-control" style="padding:0; accent-color:var(--accent-primary); cursor:pointer;" oninput="document.getElementById('energyValueBadge').innerText = this.value + ' / 10'">
+                </div>
+                <div class="form-group">
+                    <label for="sleep"><i class="fa-solid fa-moon"></i> Sleep Quality</label>
+                    <select name="sleep" id="sleep" class="period-control">
+                        <option value="Deep & Restorative">Deep & Restorative</option>
+                        <option value="Normal" selected>Normal</option>
+                        <option value="Restless / Waking">Restless / Fragmented</option>
+                        <option value="Severe Insomnia">Severe Insomnia</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Gratitude Note & Extra Comments (Responsive Row) -->
+            <div class="period-form-row">
+                <div class="form-group">
+                    <label for="gratitude"><i class="fa-solid fa-heart"></i> Daily Gratitude Note</label>
+                    <input type="text" name="gratitude" id="gratitude" class="period-control" placeholder="One comforting kindness or gentle thought today...">
+                </div>
+                <div class="form-group">
+                    <label for="notes"><i class="fa-solid fa-comment-dots"></i> Self-Care & Cravings</label>
+                    <input type="text" name="notes" id="notes" class="period-control" placeholder="Herbal chamomile tea, heating pad, magnesium, dark chocolate...">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:1.6rem;">
+                <button type="submit" class="btn" style="min-width:240px; padding:0.85rem 1.6rem; font-size:1rem;">
+                    <span>Save Wellness Entry (+15 MP)</span> <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Cycle Stats, Mood Analytics, & History Logs -->
+    <div style="display:flex; flex-direction:column; gap:1.6rem;">
+        <!-- 4-Card Analytics Summary Ribbon -->
+        <div class="stats-grid-4">
+            <div class="stat-box">
+                <span class="stat-label"><i class="fa-solid fa-circle-dot" style="color:var(--accent-primary);"></i> Current Day</span>
+                <div class="stat-number">{{ current_cycle_day }}</div>
+                <div class="stat-sub">Since cycle start</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label"><i class="fa-solid fa-wand-magic-sparkles" style="color:#ec4899;"></i> Next Forecast</span>
+                <div class="stat-number" style="font-size:1.35rem;">{{ next_period_estimate }}</div>
+                <div class="stat-sub">Based on history</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label"><i class="fa-solid fa-arrows-left-right"></i> Avg Duration</span>
+                <div class="stat-number">{{ avg_cycle }}</div>
+                <div class="stat-sub">Bleeding length</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label"><i class="fa-solid fa-calendar-days"></i> Cycle Interval</span>
+                <div class="stat-number">{{ avg_interval }}</div>
+                <div class="stat-sub">Start-to-start length</div>
+            </div>
+        </div>
+
+        <!-- Mood Velocity Doughnut Chart -->
+        <div class="card" style="margin-bottom:0;">
+            <h3 style="font-size:1.15rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
+                <span>Menstrual Mood & Emotion Spectrum</span>
+            </h3>
+            <div style="height:210px; position:relative;">
+                <canvas id="periodMoodChart"></canvas>
+            </div>
+        </div>
+
+        <!-- History Records with 3 Tabs -->
+        <div class="card" style="margin-bottom:0;">
+            <div class="view-toggle-bar">
+                <button type="button" class="view-toggle-btn active" id="tabWellnessBtn" onclick="switchPeriodView('wellness')">
+                    <i class="fa-solid fa-notes-medical"></i> <span>Daily Logs ({{ wellness_logs|length }})</span>
+                </button>
+                <button type="button" class="view-toggle-btn" id="tabCycleBtn" onclick="switchPeriodView('cycles')">
+                    <i class="fa-solid fa-calendar-days"></i> <span>Cycles ({{ cycles|length }})</span>
+                </button>
+                <button type="button" class="view-toggle-btn" id="tabScreeningBtn" onclick="switchPeriodView('screenings')">
+                    <i class="fa-solid fa-clipboard-check"></i> <span>Screenings ({{ screenings|length if screenings else 0 }})</span>
+                </button>
+            </div>
+
+            <!-- View 1: Daily Wellness Logs -->
+            <div id="viewWellnessLogs" style="max-height:440px; overflow-y:auto; padding-right:0.3rem;">
+                {% if wellness_logs %}
+                    {% for entry in wellness_logs %}
+                    <div class="cycle-card-item">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem; border-bottom:1px solid var(--card-border); padding-bottom:0.5rem; flex-wrap:wrap; gap:0.4rem;">
+                            <div>
+                                <strong style="font-size:0.95rem; color:var(--text-primary);">
+                                    {{ entry.timestamp.strftime('%a, %b %d, %Y • %I:%M %p') if entry.timestamp and entry.timestamp.strftime is defined else entry.timestamp }}
+                                </strong>
+                            </div>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                {% if entry.flow and entry.flow != 'None' %}
+                                <span class="pill-flow-{% if entry.flow == 'Heavy' %}heavy{% elif entry.flow == 'Normal' %}normal{% else %}light{% endif %}" style="font-size:0.75rem; padding:0.2rem 0.6rem; border-radius:12px; font-weight:700;">
+                                    <i class="fa-solid fa-droplet"></i> {{ entry.flow }}
+                                </span>
+                                {% endif %}
+                                {% if entry.energy %}
+                                <span style="font-size:0.75rem; padding:0.2rem 0.6rem; border-radius:12px; font-weight:700; background:var(--accent-sage-light); color:var(--accent-primary); border:1px solid rgba(40,75,63,0.15);">
+                                    <i class="fa-solid fa-bolt"></i> {{ entry.energy }}/10
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Mood Badges with live click parity -->
+                        {% if entry.mood %}
+                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.6rem;">
+                            {% for m in entry.mood.split(',') %}
+                                {% set m_clean = m.strip() %}
+                                {% if m_clean %}
+                                    <span class="mood-badge mood-{{ m_clean.lower() }}" onclick="if(typeof applyMoodAmbientTheme==='function') applyMoodAmbientTheme('{{ m_clean }}')" style="cursor:pointer; font-size:0.75rem; padding:0.2rem 0.65rem;" title="Click to view {{ m_clean }} ambient background">
+                                        {{ m_clean.replace('_', ' ').title() }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if entry.symptoms %}
+                        <div style="font-size:0.9rem; color:var(--text-primary); margin-bottom:0.4rem; line-height:1.5;">
+                            <strong>Symptoms:</strong> {{ entry.symptoms }}
+                        </div>
+                        {% endif %}
+
+                        {% if entry.gratitude %}
+                        <div style="font-size:0.86rem; color:var(--accent-primary); font-style:italic; margin-top:0.35rem;">
+                            <i class="fa-solid fa-heart" style="font-size:0.8rem; margin-right:4px;"></i> Gratitude: "{{ entry.gratitude }}"
+                        </div>
+                        {% endif %}
+
+                        {% if entry.notes %}
+                        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.3rem;">
+                            <i class="fa-solid fa-feather" style="font-size:0.8rem; margin-right:4px;"></i> Self-Care: {{ entry.notes }}
+                        </div>
+                        {% endif %}
+
+                        {% if entry.id %}
+                        <div style="display:flex; justify-content:flex-end; gap:0.4rem; margin-top:0.6rem; padding-top:0.5rem; border-top:1px solid var(--card-border);">
+                            <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:8px;" onclick="openEditWellnessModal('{{ entry.id }}', '{{ entry.mood if entry.mood else '' }}', '{{ entry.symptoms|replace('"', '&quot;') if entry.symptoms else '' }}', '{{ entry.flow if entry.flow else 'Normal' }}', '{{ entry.energy if entry.energy else '5' }}', '{{ entry.sleep if entry.sleep else 'Normal' }}', '{{ entry.gratitude|replace('"', '&quot;') if entry.gratitude else '' }}', '{{ entry.notes|replace('"', '&quot;') if entry.notes else '' }}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <form action="{{ url_for('api_delete_journal', entry_id=entry.id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete this wellness log?');">
+                                <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:8px; color:#ef4444;" title="Delete log">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:2.5rem 1rem;">
+                        <i class="fa-solid fa-spa" style="font-size:2.2rem; color:var(--text-muted); margin-bottom:0.8rem; display:block;"></i>
+                        <p style="font-size:1rem; color:var(--text-primary); font-weight:600;">No daily wellness logs yet.</p>
+                        <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:0.3rem;">Log your symptoms, pain, and mood using the form on the left.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- View 2: Menstrual Cycle Records -->
+            <div id="viewCycleRecords" style="display:none; max-height:440px; overflow-y:auto; padding-right:0.3rem;">
+                {% if cycles %}
+                    {% for cycle in cycles %}
+                    {% set start = cycle[0] %}
+                    {% set end = cycle[1] %}
+                    {% set notes = cycle[2] %}
+                    {% set length = cycle[3] %}
+                    {% set cond_tags = cycle[7] if cycle|length > 7 else None %}
+                    {% set pain = cycle[8] if cycle|length > 8 else None %}
+                    {% set phase = cycle[9] if cycle|length > 9 else None %}
+                    {% set texture = cycle[10] if cycle|length > 10 else None %}
+                    {% set cycle_id = cycle[13] if cycle|length > 13 else None %}
+                    <div class="cycle-card-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px solid var(--card-border); padding-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                            <strong style="font-size:0.95rem; color:var(--text-primary);">
+                                {{ start.strftime('%b %d, %Y') if start and start.strftime is defined else (start or 'N/A') }} 
+                                {% if end %}
+                                    &rarr; {{ end.strftime('%b %d, %Y') if end and end.strftime is defined else end }}
+                                {% else %}
+                                    &rarr; <span style="color:var(--accent-secondary); font-size:0.85rem; font-weight:700;">● Active Cycle</span>
+                                {% endif %}
+                            </strong>
+                            <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+                                {% if length is not none and length > 0 %}
+                                <span class="badge-cycle-len">{{ length }} Days Duration</span>
+                                {% endif %}
+                                {% if pain is not none %}
+                                <span style="font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:10px; font-weight:700; background:{% if pain >= 7 %}rgba(239,68,68,0.15); color:#ef4444;{% elif pain >= 4 %}rgba(245,158,11,0.15); color:#d97706;{% else %}rgba(16,185,129,0.15); color:#10b981;{% endif %}">
+                                    Pain: {{ pain }}/10
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if cond_tags %}
+                        <div style="display:flex; gap:0.35rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+                            {% for tag in cond_tags.split(',') %}
+                            <span style="font-size:0.75rem; padding:0.15rem 0.55rem; border-radius:8px; background:rgba(236,72,153,0.1); color:#ec4899; font-weight:700; border:1px solid rgba(236,72,153,0.2);">
+                                {{ tag.strip() }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if notes %}
+                        <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">"{{ notes }}"</p>
+                        {% else %}
+                        <p style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">No additional notes recorded for this cycle.</p>
+                        {% endif %}
+
+                        {% if cycle_id %}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid var(--card-border); flex-wrap:wrap; gap:0.4rem;">
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">
+                                {% if texture %}<i class="fa-solid fa-vial"></i> {{ texture }}{% endif %}
+                            </span>
+                            <div style="display:flex; gap:0.4rem; align-items:center;">
+                                <button type="button" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:8px;" onclick="openEditCycleModal('{{ cycle_id }}', '{{ start }}', '{{ end if end else '' }}', '{{ notes|replace('"', '&quot;') if notes else '' }}', '{{ cond_tags if cond_tags else '' }}', '{{ pain if pain is not none else 0 }}', '{{ texture if texture else 'Standard Flow' }}')">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <form action="{{ url_for('api_period_cycle_delete', cycle_id=cycle_id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete this cycle record?');">
+                                    <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:8px; color:#ef4444;" title="Delete cycle">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:2.5rem 1rem;">
+                        <i class="fa-solid fa-calendar-xmark" style="font-size:2.2rem; color:var(--text-muted); margin-bottom:0.8rem; display:block;"></i>
+                        <p style="font-size:1rem; color:var(--text-primary); font-weight:600;">No cycles recorded yet.</p>
+                        <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:0.3rem;">Specify your cycle start date in the check-in form to start tracking.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- View 3: Clinical Diagnostic Screenings -->
+            <div id="viewScreeningLogs" style="display:none; max-height:440px; overflow-y:auto; padding-right:0.3rem;">
+                {% if screenings %}
+                    {% for scr in screenings %}
+                    <div class="cycle-card-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; border-bottom:1px solid var(--card-border); padding-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <span style="font-size:0.82rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:10px; background:{% if scr[1] == 'PMDD' %}rgba(236,72,153,0.15); color:#ec4899;{% else %}rgba(139,92,246,0.15); color:#8b5cf6;{% endif %}">
+                                    {{ scr[1] }} SCREENER
+                                </span>
+                                <strong style="font-size:0.92rem; color:var(--text-primary);">{{ scr[3] }}</strong>
+                            </div>
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">
+                                {{ scr[5].strftime('%b %d, %Y') if scr[5] and scr[5].strftime is defined else scr[5] }}
+                            </span>
+                        </div>
+                        <p style="font-size:0.88rem; color:var(--text-primary); line-height:1.5; margin-bottom:0.35rem;">
+                            {{ scr[4] }}
+                        </p>
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">
+                            Profile: <strong>{{ scr[6] or 'Self' }}</strong> • Clinical Score: <strong>{{ scr[2] }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:2.5rem 1rem;">
+                        <i class="fa-solid fa-clipboard-question" style="font-size:2.2rem; color:var(--text-muted); margin-bottom:0.8rem; display:block;"></i>
+                        <p style="font-size:1rem; color:var(--text-primary); font-weight:600;">No clinical screenings completed yet.</p>
+                        <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:0.3rem;">Take a DSM-5 PMDD or Rotterdam PCOS self-assessment above.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding Woman / Dependent Profile -->
+<div id="addProfileModal" class="sarathi-modal">
+    <div class="sarathi-modal-dialog" style="max-width:520px;">
+        <button type="button" onclick="closeAddProfileModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:transparent; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer;">&times;</button>
+        <h2 style="font-size:1.35rem; color:var(--text-primary); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-heart" style="color:var(--accent-primary);"></i> Add Profile to Support
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem;">
+            Log and manage menstrual health records, cycle history, and symptoms for a family member or dependent.
+        </p>
+
+        <form action="{{ url_for('api_profile_add') }}" method="POST">
+            <div class="form-group">
+                <label for="modal_profile_name">Profile / Person Name *</label>
+                <input type="text" name="profile_name" id="modal_profile_name" class="period-control" placeholder="e.g. Maya, Ananya, Mom" required>
+            </div>
+            <div class="form-group">
+                <label for="modal_relationship">Relationship</label>
+                <select name="relationship" id="modal_relationship" class="period-control" required>
+                    <option value="Partner / Wife">Partner / Wife</option>
+                    <option value="Daughter">Daughter</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Self">Self</option>
+                    <option value="Other">Other Dependent</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal_age">Age (Optional)</label>
+                <input type="number" name="age" id="modal_age" class="period-control" placeholder="e.g. 24" min="10" max="75">
+            </div>
+            <div class="form-group">
+                <label for="modal_notes">Notes / Known Conditions (Optional)</label>
+                <textarea name="notes" id="modal_notes" class="period-control" placeholder="e.g. Diagnosed PCOS in 2024, prone to severe dysmenorrhea..." style="min-height:75px;"></textarea>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddProfileModal()">Cancel</button>
+                <button type="submit" class="btn">Create Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for DSM-5 PMDD Diagnostic Screener -->
+<div id="pmddModal" class="sarathi-modal">
+    <div class="sarathi-modal-dialog">
+        <button type="button" onclick="closePmddModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:transparent; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer;">&times;</button>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+            <div style="width:40px; height:40px; border-radius:12px; background:rgba(236,72,153,0.15); color:#ec4899; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+                <h2 style="font-size:1.35rem; color:var(--text-primary); margin:0;">DSM-5 PMDD Diagnostic Screener</h2>
+                <span style="font-size:0.8rem; color:var(--text-secondary);">Premenstrual Dysphoric Disorder Clinical Criteria</span>
+            </div>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem; line-height:1.5;">
+            Rate each symptom as experienced specifically in the <strong>final 7-10 days before your menstrual period</strong> (late luteal phase) compared to after menses begins (0 = Not at all, 4 = Extreme / Disabling).
+        </p>
+
+        <form id="pmddForm" onsubmit="submitPmddScreener(event)">
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        1. Marked affective lability (sudden sadness, tearfulness, extreme rejection sensitivity)
+                    </label>
+                    <select name="mood_swings" class="period-control" required>
+                        <option value="0">0 - None / Not at all</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe (Core Criterion)</option>
+                        <option value="4">4 - Extreme / Overwhelming</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        2. Marked irritability, intense anger, or increased interpersonal conflicts
+                    </label>
+                    <select name="irritability_anger" class="period-control" required>
+                        <option value="0">0 - None / Not at all</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe (Core Criterion)</option>
+                        <option value="4">4 - Extreme / Explosive</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        3. Markedly depressed mood, feelings of utter hopelessness, or self-deprecating thoughts
+                    </label>
+                    <select name="depressed_hopeless" class="period-control" required>
+                        <option value="0">0 - None / Not at all</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe (Core Criterion)</option>
+                        <option value="4">4 - Extreme / Despair</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        4. Marked anxiety, severe tension, or feelings of being keyed up / on edge
+                    </label>
+                    <select name="anxiety_tension" class="period-control" required>
+                        <option value="0">0 - None / Not at all</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe (Core Criterion)</option>
+                        <option value="4">4 - Extreme Panic</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        5. Decreased interest in usual activities (work, school, friends, hobbies)
+                    </label>
+                    <select name="decreased_interest" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe</option>
+                        <option value="4">4 - Extreme Disengagement</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        6. Subjective difficulty concentrating or severe brain fog
+                    </label>
+                    <select name="concentration_diff" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe</option>
+                        <option value="4">4 - Extreme Inability to Focus</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        7. Lethargy, easy fatigability, or marked lack of energy
+                    </label>
+                    <select name="lethargy_fatigue" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe Exhaustion</option>
+                        <option value="4">4 - Incapacitating Fatigue</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        8. Marked change in appetite, overeating, or specific food cravings
+                    </label>
+                    <select name="appetite_cravings" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe Cravings/Bingeing</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        9. Hypersomnia (sleeping excessively) or insomnia (unable to sleep)
+                    </label>
+                    <select name="sleep_disturbances" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe Sleep Disruption</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        10. Sense of being overwhelmed or unable to control emotions
+                    </label>
+                    <select name="overwhelmed_control" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe Overwhelm</option>
+                        <option value="4">4 - Extreme Loss of Control</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        11. Physical symptoms (breast tenderness/swelling, joint or muscle pain, bloating)
+                    </label>
+                    <select name="physical_somatic" class="period-control" required>
+                        <option value="0">0 - None</option>
+                        <option value="1">1 - Mild</option>
+                        <option value="2">2 - Moderate</option>
+                        <option value="3">3 - Severe Physical Symptoms</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="pmddResultBox" style="display:none; margin-top:1.4rem; padding:1.2rem; border-radius:16px; background:var(--accent-sage-light); border:1.5px solid var(--accent-primary);"></div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closePmddModal()">Cancel</button>
+                <button type="submit" class="btn" id="pmddSubmitBtn">
+                    <span>Evaluate DSM-5 PMDD Criteria</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Rotterdam PCOS Risk Screener -->
+<div id="pcosModal" class="sarathi-modal">
+    <div class="sarathi-modal-dialog" style="max-width:580px;">
+        <button type="button" onclick="closePcosModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:transparent; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer;">&times;</button>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+            <div style="width:40px; height:40px; border-radius:12px; background:rgba(139,92,246,0.15); color:#8b5cf6; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <i class="fa-solid fa-stethoscope"></i>
+            </div>
+            <div>
+                <h2 style="font-size:1.35rem; color:var(--text-primary); margin:0;">Rotterdam PCOS Risk Screener</h2>
+                <span style="font-size:0.8rem; color:var(--text-secondary);">Polycystic Ovary Syndrome Clinical Indicators</span>
+            </div>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem; line-height:1.5;">
+            Evaluate clinical risk factors according to Rotterdam consensus diagnostic indicators.
+        </p>
+
+        <form id="pcosForm" onsubmit="submitPcosScreener(event)">
+            <div style="display:flex; flex-direction:column; gap:1.1rem;">
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        1. Menstrual Cycle Regularity
+                    </label>
+                    <select name="cycle_irregularity" class="period-control" required>
+                        <option value="0">Regular (24 - 35 days, predictable)</option>
+                        <option value="1">Mildly Irregular (occasional variations)</option>
+                        <option value="3">Highly Irregular (>35 days or fewer than 8 cycles per year)</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        2. Signs of Elevated Androgens
+                    </label>
+                    <select name="androgen_signs" class="period-control" required>
+                        <option value="0">None reported</option>
+                        <option value="1">Mild acne or occasional hair shedding</option>
+                        <option value="3">Moderate to Severe (cystic jawline acne, hirsutism on chin/chest/abdomen, or crown hair thinning)</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        3. Metabolic Sensitivity Indicators
+                    </label>
+                    <select name="metabolic_signs" class="period-control" required>
+                        <option value="0">Normal metabolic stability</option>
+                        <option value="1">Mild sugar cravings or afternoon energy crashes</option>
+                        <option value="2">Marked insulin resistance markers (stubborn abdominal weight, severe sweet cravings, acanthosis nigricans)</option>
+                    </select>
+                </div>
+
+                <div style="padding:0.75rem 1rem; background:var(--input-bg); border-radius:12px; border:1px solid var(--card-border);">
+                    <label style="font-size:0.9rem; font-weight:700; color:var(--text-primary); display:block; margin-bottom:0.35rem;">
+                        4. Prior Diagnostic Ultrasound
+                    </label>
+                    <select name="ultrasound_cysts" class="period-control" required>
+                        <option value="0">No ultrasound done / normal ovarian morphology</option>
+                        <option value="1">Confirmed polycystic appearance (>= 12-20 follicles per ovary / string of pearls)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="pcosResultBox" style="display:none; margin-top:1.4rem; padding:1.2rem; border-radius:16px; background:var(--accent-sage-light); border:1.5px solid var(--accent-primary);"></div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closePcosModal()">Cancel</button>
+                <button type="submit" class="btn" id="pcosSubmitBtn">
+                    <span>Evaluate PCOS Markers</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Editing Cycle Record -->
+<div id="editCycleModal" class="sarathi-modal">
+    <div class="sarathi-modal-dialog" style="max-width:560px;">
+        <button type="button" onclick="closeEditCycleModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:transparent; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer;">&times;</button>
+        <h2 style="font-size:1.35rem; color:var(--text-primary); margin-bottom:0.4rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-pen-to-square" style="color:var(--accent-primary);"></i> Edit Menstrual Cycle Record
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem;">
+            Update cycle dates, pain severity, condition tags, or notes.
+        </p>
+
+        <form id="editCycleForm" method="POST" action="">
+            <div class="period-form-row">
+                <div class="form-group">
+                    <label for="edit_start_date">Cycle Start Date *</label>
+                    <input type="date" name="start_date" id="edit_start_date" class="period-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_end_date">Cycle End Date (Optional)</label>
+                    <input type="date" name="end_date" id="edit_end_date" class="period-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Clinical Conditions (Select all that apply):</label>
+                <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.25rem;" id="editConditionsContainer">
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PCOS">
+                        <i class="fa-solid fa-circle-dot"></i> PCOS / PCOD
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PMDD">
+                        <i class="fa-solid fa-brain"></i> PMDD
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="PMS">
+                        <i class="fa-solid fa-leaf"></i> PMS
+                    </label>
+                    <label class="condition-chip" onclick="toggleConditionChip(this)">
+                        <input type="checkbox" name="conditions" value="Endometriosis">
+                        <i class="fa-solid fa-shield-halved"></i> Endometriosis
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="edit_pain_score">Pain Severity (VAS 0 - 10):</label>
+                    <span id="editPainBadge" style="font-weight:700; color:var(--accent-primary);">0 / 10</span>
+                </div>
+                <input type="range" name="pain_score" id="edit_pain_score" min="0" max="10" value="0" class="period-control" style="padding:0; accent-color:var(--accent-primary); cursor:pointer;" oninput="updateEditPainBadge(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label for="edit_flow_texture">Flow / Fluid Texture</label>
+                <select name="flow_texture" id="edit_flow_texture" class="period-control">
+                    <option value="Standard Flow">Standard Flow</option>
+                    <option value="Light Spotting">Light Spotting</option>
+                    <option value="Heavy with Clots">Heavy with Clots</option>
+                    <option value="Watery / Thin">Watery / Thin</option>
+                    <option value="Brownish / Dark">Brownish / Dark</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="edit_notes">Symptoms & Clinical Notes</label>
+                <textarea name="notes" id="edit_notes" class="period-control" style="min-height:85px;"></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.4rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditCycleModal()">Cancel</button>
+                <button type="submit" class="btn">Save Cycle Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Editing Daily Wellness Log -->
+<div id="editWellnessModal" class="sarathi-modal">
+    <div class="sarathi-modal-dialog" style="max-width:560px;">
+        <button type="button" onclick="closeEditWellnessModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:transparent; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer;">&times;</button>
+        <h2 style="font-size:1.35rem; color:var(--text-primary); margin-bottom:0.4rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-notes-medical" style="color:var(--accent-primary);"></i> Edit Daily Wellness Check-In
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem;">
+            Update logged symptoms, flow, mood, energy, or self-care notes.
+        </p>
+
+        <form id="editWellnessForm" method="POST" action="">
+            <div class="period-form-row">
+                <div class="form-group">
+                    <label for="edit_w_flow">Flow Intensity</label>
+                    <select name="flow" id="edit_w_flow" class="period-control">
+                        <option value="None">None</option>
+                        <option value="Light">Light</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Heavy">Heavy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_w_sleep">Sleep Quality</label>
+                    <select name="sleep" id="edit_w_sleep" class="period-control">
+                        <option value="Deep & Restorative">Deep & Restorative</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Restless / Waking">Restless / Waking</option>
+                        <option value="Severe Insomnia">Severe Insomnia</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="edit_w_energy">Vital Energy (1 to 10):</label>
+                    <span id="editWEnergyBadge" style="font-weight:700; color:var(--accent-primary);">5 / 10</span>
+                </div>
+                <input type="range" name="energy" id="edit_w_energy" min="1" max="10" value="5" class="period-control" style="padding:0; accent-color:var(--accent-primary); cursor:pointer;" oninput="document.getElementById('editWEnergyBadge').innerText = this.value + ' / 10'">
+            </div>
+
+            <div class="form-group">
+                <label for="edit_w_mood">Mood Label</label>
+                <input type="text" name="mood" id="edit_w_mood" class="period-control" placeholder="e.g. peaceful, calm">
+            </div>
+
+            <div class="form-group">
+                <label for="edit_w_symptoms">Physical Symptoms</label>
+                <textarea name="symptoms" id="edit_w_symptoms" class="period-control" style="min-height:75px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="edit_w_gratitude">Gratitude Note</label>
+                <input type="text" name="gratitude" id="edit_w_gratitude" class="period-control">
+            </div>
+
+            <div class="form-group">
+                <label for="edit_w_notes">Self-Care & Cravings</label>
+                <input type="text" name="notes" id="edit_w_notes" class="period-control">
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.4rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditWellnessModal()">Cancel</button>
+                <button type="submit" class="btn">Update Wellness Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gita Wisdom and Reframing for Menstrual Wellness
+const PERIOD_SHLOKAS = {
+    'peaceful': {
+        shlok: "प्रशान्तमनसं ह्येनं योगिनं सुखमुत्तमम् | उपैति शान्तरजसं ब्रह्मभूतमकल्मषम् ||",
+        meaning: "Supreme joy comes to the yogi whose mind is peaceful, whose passions are quieted, and who is freed from stain. (BG 6.27)"
+    },
+    'anxious': {
+        shlok: "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन | मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ||",
+        meaning: "You have a right to your actions, but never to their fruits. Ground yourself in the present moment; let anxiety dissolve. (BG 2.47)"
+    },
+    'overwhelmed': {
+        shlok: "यथा दीपो निवातस्थो नेङ्गते सोपमा स्मृता | योगिनो यतचित्तस्य युञ्जतो योगमात्मनः ||",
+        meaning: "As a lamp in a windless place does not flicker, so does the regulated mind remain calm amidst physical fluctuations. (BG 6.19)"
+    },
+    'sad': {
+        shlok: "मात्रास्पर्शास्तु कौन्तेय शीतोष्णसुखदुःखदाः | आगमापायिनोऽनित्यास्तांस्तितिक्षस्व भारत ||",
+        meaning: "Sensory experiences like pain and sorrow are temporary, coming and going like seasons. Bear them with quiet patience. (BG 2.14)"
+    },
+    'burned_out': {
+        shlok: "युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु | युक्तस्वप्नावबोधस्य योगो भवति दुःखहा ||",
+        meaning: "He who is regulated in diet, rest, work, and sleep attains yoga that destroys all sorrows. Honor your need for restorative rest. (BG 6.17)"
+    },
+    'content': {
+        shlok: "सन्तुष्टः सततं योगी यतात्मा दृढनिश्चयः | मय्यर्पितमनोबुद्धिर्यो मद्भक्तः स मे प्रियः ||",
+        meaning: "Ever content, steady in self-harmony, firm in conviction, with mind and intellect surrendered to the divine. (BG 12.14)"
+    },
+    'default': {
+        shlok: "न हि ज्ञानेन सदृशं पवित्रमिह विद्यते | तत्स्वयं योगसंसिद्धः कालेनात्मनि विन्दति ||",
+        meaning: "Truly there is nothing in this world as purifying as profound knowledge. In due time, one realizes this wisdom within. (BG 4.38)"
+    }
+};
+
+function toggleMoodTag(labelElement, mood) {
+    const checkbox = labelElement.querySelector('input[type="checkbox"]');
+    setTimeout(() => {
+        if (checkbox.checked) {
+            labelElement.classList.add('selected');
+        } else {
+            labelElement.classList.remove('selected');
+        }
+        updateShlokaReflection();
+    }, 10);
+
+    if (typeof applyMoodAmbientTheme === 'function') {
+        applyMoodAmbientTheme(mood);
+    }
+}
+
+function toggleConditionChip(chipElement) {
+    const cb = chipElement.querySelector('input[type="checkbox"]');
+    setTimeout(() => {
+        if (cb.checked) {
+            chipElement.classList.add('active');
+        } else {
+            chipElement.classList.remove('active');
+        }
+    }, 10);
+}
+
+function updatePainBadge(val) {
+    const badge = document.getElementById('painValueBadge');
+    const v = parseInt(val);
+    let label = `${v} / 10`;
+    if (v === 0) {
+        label += ' (No Pain)';
+        badge.style.color = '#10b981';
+    } else if (v <= 3) {
+        label += ' (Mild)';
+        badge.style.color = '#10b981';
+    } else if (v <= 6) {
+        label += ' (Moderate Cramps)';
+        badge.style.color = '#d97706';
+    } else if (v <= 8) {
+        label += ' (Severe Pain)';
+        badge.style.color = '#ef4444';
+    } else {
+        label += ' (Acute / Incapacitating)';
+        badge.style.color = '#b91c1c';
+    }
+    badge.innerText = label;
+}
+
+function updateShlokaReflection() {
+    const checked = document.querySelectorAll('#moodToggleGrid input[type="checkbox"]:checked');
+    let selectedMood = 'default';
+    if (checked.length > 0) {
+        selectedMood = checked[checked.length - 1].value;
+    }
+
+    const data = PERIOD_SHLOKAS[selectedMood] || PERIOD_SHLOKAS['default'];
+    document.getElementById('periodShlokText').innerText = `"${data.shlok}"`;
+    document.getElementById('periodShlokMeaning').innerText = data.meaning;
+    document.getElementById('periodWisdomMoodBadge').innerText = selectedMood.replace('_', ' ');
+}
+
+// Switch between Daily Wellness Logs, Cycle Records, and Clinical Screenings
+function switchPeriodView(viewName) {
+    const wellnessView = document.getElementById('viewWellnessLogs');
+    const cycleView = document.getElementById('viewCycleRecords');
+    const screeningView = document.getElementById('viewScreeningLogs');
+    const wellnessBtn = document.getElementById('tabWellnessBtn');
+    const cycleBtn = document.getElementById('tabCycleBtn');
+    const screeningBtn = document.getElementById('tabScreeningBtn');
+
+    [wellnessView, cycleView, screeningView].forEach(v => v.style.display = 'none');
+    [wellnessBtn, cycleBtn, screeningBtn].forEach(b => b.classList.remove('active'));
+
+    if (viewName === 'wellness') {
+        wellnessView.style.display = 'block';
+        wellnessBtn.classList.add('active');
+    } else if (viewName === 'cycles') {
+        cycleView.style.display = 'block';
+        cycleBtn.classList.add('active');
+    } else if (viewName === 'screenings') {
+        screeningView.style.display = 'block';
+        screeningBtn.classList.add('active');
+    }
+}
+
+
+// Edit Cycle Modal Controls
+function openEditCycleModal(id, start, end, notes, conditions, pain, texture) {
+    const form = document.getElementById('editCycleForm');
+    form.action = `/api/period/cycle/edit/${id}`;
+    document.getElementById('edit_start_date').value = start || '';
+    document.getElementById('edit_end_date').value = end || '';
+    document.getElementById('edit_notes').value = notes || '';
+    document.getElementById('edit_pain_score').value = pain || 0;
+    updateEditPainBadge(pain || 0);
+    if (texture) document.getElementById('edit_flow_texture').value = texture;
+
+    // Check condition chips
+    const condList = (conditions || '').split(',').map(c => c.trim().toLowerCase());
+    document.querySelectorAll('#editConditionsContainer .condition-chip').forEach(chip => {
+        const val = chip.querySelector('input').value.toLowerCase();
+        if (condList.includes(val)) {
+            chip.classList.add('active');
+            chip.querySelector('input').checked = true;
+        } else {
+            chip.classList.remove('active');
+            chip.querySelector('input').checked = false;
+        }
+    });
+
+    document.getElementById('editCycleModal').style.display = 'flex';
+}
+
+function closeEditCycleModal() {
+    document.getElementById('editCycleModal').style.display = 'none';
+}
+
+function updateEditPainBadge(val) {
+    const badge = document.getElementById('editPainBadge');
+    const v = parseInt(val);
+    badge.innerText = `${v} / 10`;
+}
+
+// Edit Daily Wellness Modal Controls
+function openEditWellnessModal(id, mood, symptoms, flow, energy, sleep, gratitude, notes) {
+    const form = document.getElementById('editWellnessForm');
+    form.action = `/api/period/wellness/edit/${id}`;
+    document.getElementById('edit_w_mood').value = mood || '';
+    document.getElementById('edit_w_symptoms').value = symptoms || '';
+    document.getElementById('edit_w_flow').value = flow || 'Normal';
+    document.getElementById('edit_w_energy').value = energy || '5';
+    document.getElementById('editWEnergyBadge').innerText = (energy || '5') + ' / 10';
+    document.getElementById('edit_w_sleep').value = sleep || 'Normal';
+    document.getElementById('edit_w_gratitude').value = gratitude || '';
+    document.getElementById('edit_w_notes').value = notes || '';
+    document.getElementById('editWellnessModal').style.display = 'flex';
+}
+
+function closeEditWellnessModal() {
+    document.getElementById('editWellnessModal').style.display = 'none';
+}
+
+// Add edit modals to outside click listener
+window.addEventListener('click', function(e) {
+    ['addProfileModal', 'pmddModal', 'pcosModal', 'editCycleModal', 'editWellnessModal'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m && e.target === m) {
+            m.style.display = 'none';
+        }
+    });
+});
+
+// Profile Modal Controls
+function openAddProfileModal() {
+    document.getElementById('addProfileModal').style.display = 'flex';
+}
+function closeAddProfileModal() {
+    document.getElementById('addProfileModal').style.display = 'none';
+}
+
+// PMDD Modal Controls
+function openPmddModal() {
+    document.getElementById('pmddModal').style.display = 'flex';
+}
+function closePmddModal() {
+    document.getElementById('pmddModal').style.display = 'none';
+}
+
+// PCOS Modal Controls
+function openPcosModal() {
+    document.getElementById('pcosModal').style.display = 'flex';
+}
+function closePcosModal() {
+    document.getElementById('pcosModal').style.display = 'none';
+}
+
+// Close modals on outside backdrop click
+window.addEventListener('click', function(e) {
+    ['addProfileModal', 'pmddModal', 'pcosModal'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m && e.target === m) {
+            m.style.display = 'none';
+        }
+    });
+});
+
+// Submit PMDD Screener via AJAX
+function submitPmddScreener(e) {
+    e.preventDefault();
+    const form = document.getElementById('pmddForm');
+    const formData = new FormData(form);
+    const payload = {};
+    formData.forEach((val, key) => payload[key] = parseInt(val) || 0);
+
+    const btn = document.getElementById('pmddSubmitBtn');
+    btn.disabled = true;
+    btn.innerText = 'Evaluating Criteria...';
+
+    fetch('/api/period/screener/pmdd', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerText = 'Evaluate DSM-5 PMDD Criteria';
+        if (data.assessment) {
+            const resBox = document.getElementById('pmddResultBox');
+            resBox.style.display = 'block';
+            resBox.innerHTML = `
+                <div style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin-bottom:0.4rem;">
+                    Assessment Result: ${data.assessment.tier}
+                </div>
+                <div style="font-size:0.88rem; font-weight:700; color:#ec4899; margin-bottom:0.6rem;">
+                    Risk Level: ${data.assessment.risk_level} (Total Clinical Score: ${data.assessment.total_score}, Core Affective: ${data.assessment.core_symptoms_count})
+                </div>
+                <p style="font-size:0.9rem; color:var(--text-primary); line-height:1.5; margin:0;">
+                    ${data.assessment.recommendation}
+                </p>
+                <div style="margin-top:0.8rem; font-size:0.82rem; color:var(--accent-primary); font-weight:700;">
+                    <i class="fa-solid fa-circle-check"></i> Recorded in your health profile (+20 Mindful Points). Page will refresh shortly.
+                </div>
+            `;
+            setTimeout(() => { window.location.reload(); }, 2500);
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerText = 'Evaluate DSM-5 PMDD Criteria';
+        console.error(err);
+        form.submit();
+    });
+}
+
+// Submit PCOS Screener via AJAX
+function submitPcosScreener(e) {
+    e.preventDefault();
+    const form = document.getElementById('pcosForm');
+    const formData = new FormData(form);
+    const payload = {};
+    formData.forEach((val, key) => payload[key] = val);
+
+    const btn = document.getElementById('pcosSubmitBtn');
+    btn.disabled = true;
+    btn.innerText = 'Evaluating Markers...';
+
+    fetch('/api/period/screener/pcos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerText = 'Evaluate PCOS Markers';
+        if (data.assessment) {
+            const resBox = document.getElementById('pcosResultBox');
+            resBox.style.display = 'block';
+            resBox.innerHTML = `
+                <div style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin-bottom:0.4rem;">
+                    Assessment Result: ${data.assessment.risk_level}
+                </div>
+                <div style="font-size:0.88rem; font-weight:700; color:#8b5cf6; margin-bottom:0.6rem;">
+                    Rotterdam Marker Score: ${data.assessment.score} / 11
+                </div>
+                <p style="font-size:0.9rem; color:var(--text-primary); line-height:1.5; margin:0;">
+                    ${data.assessment.summary}
+                </p>
+                <div style="margin-top:0.8rem; font-size:0.82rem; color:var(--accent-primary); font-weight:700;">
+                    <i class="fa-solid fa-circle-check"></i> Saved to your clinical profile (+20 Mindful Points). Page will refresh shortly.
+                </div>
+            `;
+            setTimeout(() => { window.location.reload(); }, 2500);
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerText = 'Evaluate PCOS Markers';
+        console.error(err);
+        form.submit();
+    });
+}
+
+// Mood Velocity Doughnut Chart Initialization
+document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('periodMoodChart');
+    if (!ctx) return;
+
+    {% if mood_counts and mood_counts.keys()|length > 0 %}
+    const moodLabels = {{ mood_counts.keys()|list|tojson }};
+    const moodValues = {{ mood_counts.values()|list|tojson }};
+    {% else %}
+    const moodLabels = ['Peaceful', 'Content', 'Restless', 'Anxious', 'Fatigued'];
+    const moodValues = [4, 3, 2, 2, 1];
+    {% endif %}
+
+    const palette = [
+        '#284B3F', '#4d7c6f', '#10b981', '#f59e0b', 
+        '#ec4899', '#8b5cf6', '#6366f1', '#14b8a6', '#f43f5e'
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: moodLabels,
+            datasets: [{
+                data: moodValues,
+                backgroundColor: palette.slice(0, moodLabels.length),
+                borderWidth: 2,
+                borderColor: 'var(--card-bg)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'var(--text-secondary)',
+                        font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: '500' },
+                        boxWidth: 12,
+                        padding: 12
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

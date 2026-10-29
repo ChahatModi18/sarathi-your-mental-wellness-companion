@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}Counselor Booking{% endblock %}
+
+{% block style %}
+<style>
+    .booking-layout {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .booking-control {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-family: var(--font-sub);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .booking-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        background: rgba(140, 82, 255, 0.02);
+    }
+
+    .counselor-list-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .counselor-card {
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .counselor-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .counselor-card.selected {
+        background: rgba(140, 82, 255, 0.15);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 10px rgba(140, 82, 255, 0.15);
+    }
+
+    .counselor-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(140, 82, 255, 0.2);
+        border: 1px solid var(--accent-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+    }
+
+    .online-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .online-true {
+        background: var(--accent-secondary);
+        box-shadow: 0 0 8px var(--accent-secondary);
+    }
+
+    .online-false {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-family: var(--font-main);
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: rgba(255, 234, 0, 0.12);
+        border: 1px solid var(--accent-warning);
+        color: #fffa79;
+    }
+
+    .status-approved {
+        background: rgba(0, 230, 118, 0.15);
+        border: 1px solid var(--accent-secondary);
+        color: #79ffb2;
+    }
+
+    .status-rejected {
+        background: rgba(255, 23, 68, 0.15);
+        border: 1px solid var(--accent-alert);
+        color: #ffcbd4;
+    }
+
+    .booking-card-item {
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        padding: 1.25rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-calendar-check"></i> Confidential Counselor Booking</h1>
+    <p style="color:var(--text-secondary); font-size:1.05rem;">Book private, anonymous counseling sessions with our certified mental wellness specialists.</p>
+</div>
+
+<div class="booking-layout">
+    <!-- Form Panel -->
+    <div class="card" style="margin-bottom:0;">
+        <h2 style="font-size:1.4rem; margin-bottom:1.5rem;"><i class="fa-solid fa-edit"></i> Appointment Request</h2>
+        
+        <form action="{{ url_for('booking') }}" method="POST" id="appointment-form">
+            <!-- Hidden Fields -->
+            <input type="hidden" name="counselor_id" id="form-counselor-id" required>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.2rem;">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="booking-control" value="{{ session.get('username') }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Specialization Needed</label>
+                    <select name="specialization" class="booking-control" style="appearance:none;" onchange="filterSlots()">
+                        <option value="General">General Wellness</option>
+                        <option value="Anxiety">Anxiety Management</option>
+                        <option value="Depression">Depression Support</option>
+                        <option value="Stress">Stress Relief</option>
+                        <option value="Relationship">Relationship Therapy</option>
+                        <option value="Academic">Academic Guidance</option>
+                        <option value="Career">Career Counseling</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Counselors Selection Grid -->
+            <div class="form-group">
+                <label>Select Counselor</label>
+                <div class="counselor-list-grid">
+                    {% for c_id, c_name, c_spec, c_online in counselors %}
+                        <div class="counselor-card" id="card-counselor-{{ c_id }}" onclick="selectCounselor({{ c_id }}, '{{ c_name }}')">
+                            <div class="counselor-avatar">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <strong style="color: var(--text-primary); font-size:0.95rem; display:block;">{{ c_name }}</strong>
+                                <span style="font-size:0.78rem; color:var(--text-secondary); display:block; margin-top:0.15rem;">{{ c_spec }}</span>
+                                <span style="font-size:0.75rem; color:var(--text-secondary); display:flex; align-items:center; gap:0.3rem; margin-top:0.3rem;">
+                                    <span class="online-indicator online-{{ 'true' if c_online else 'false' }}"></span>
+                                    {{ 'Online' if c_online else 'Offline' }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Slot Selection -->
+            <div class="form-group">
+                <label>Available Time Slots</label>
+                <select name="slot_id" id="slot-select" class="booking-control" style="appearance:none;" required>
+                    <option value="">Select a counselor first</option>
+                </select>
+            </div>
+
+            <!-- Reason -->
+            <div class="form-group">
+                <label>Reason for Session</label>
+                <textarea name="reason" class="booking-control" placeholder="Provide a brief explanation of what you'd like to discuss (optional)..." style="min-height:100px; resize:vertical;"></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
+                <button type="submit" class="btn" id="book-btn" disabled>
+                    <span>Request Appointment</span> <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bookings History -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        <h2 style="font-size:1.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Booked Sessions</h2>
+        
+        <div style="max-height:calc(100vh - 120px); overflow-y:auto; padding-right:0.5rem;">
+            {% if bookings %}
+                {% for b_id, c_name, b_time, b_spec, b_reason, b_status in bookings %}
+                    <div class="booking-card-item">
+                        <div>
+                            <strong style="color: var(--text-primary); font-size:1.05rem; display:block;">Counselor: {{ c_name }}</strong>
+                            <span style="font-size:0.85rem; color:var(--text-secondary); display:block; margin:0.25rem 0;">Topic: {{ b_spec }}</span>
+                            <span style="font-size:0.8rem; color:var(--text-secondary); font-family:var(--font-sub);"><i class="fa-solid fa-calendar"></i> {{ b_time.strftime('%b %d, %Y %I:%M %p') }}</span>
+                            {% if b_reason %}
+                                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem; font-family:var(--font-sub); font-style:italic;">"{{ b_reason }}"</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="status-badge status-{{ b_status.lower() }}">{{ b_status }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="card" style="text-align:center; padding:3rem; background:rgba(255,255,255,0.01);">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size:2rem; color:var(--text-secondary); margin-bottom:1rem;"></i>
+                    <p>No booked sessions yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Clinical Record Sharing & Counselor Permissions -->
+    <div style="grid-column: 1 / -1; margin-top: 1.5rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; box-shadow: 0 8px 30px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="font-size:1.4rem; display:flex; align-items:center; gap:0.6rem; color:var(--text-primary); margin-bottom:0.3rem;">
+                    <i class="fa-solid fa-lock-open" style="color:var(--accent-primary);"></i>
+                    <span>Grant Clinical Access to a Counselor</span>
+                </h2>
+                <p style="color:var(--text-secondary); font-size:0.92rem; margin:0;">
+                    Allow your verified counselor to review your journal reflections, mood distributions, and psychometric screening progress for a custom date period as allowed till.
+                </p>
+            </div>
+        </div>
+
+        <!-- Grant Permission Form -->
+        <form action="{{ url_for('api_permissions_grant') }}" method="POST" style="background:var(--input-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.5rem; margin-bottom:2rem;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
+                <div class="form-group">
+                    <label for="perm-counselor-select"><i class="fa-solid fa-user-doctor"></i> Select Counselor</label>
+                    <select name="counselor_id" id="perm-counselor-select" class="booking-control" required>
+                        <option value="">-- Choose Verified Counselor --</option>
+                        {% for c_id, c_name, c_spec, c_online in counselors %}
+                            <option value="{{ c_id }}">{{ c_name }} ({{ c_spec }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="allowed_until"><i class="fa-solid fa-calendar-day"></i> Allowed Access Until (Custom Expiry Date) *</label>
+                    <input type="date" name="allowed_until" id="allowed_until" class="booking-control" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom:1.2rem;">
+                <label style="font-size:0.88rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:0.5rem;">
+                    Permitted Clinical Scopes:
+                </label>
+                <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:0.45rem; font-size:0.9rem; color:var(--text-primary); cursor:pointer;">
+                        <input type="checkbox" name="can_view_journal" value="1" checked>
+                        <span>Reflection Journal & Mood History</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.45rem; font-size:0.9rem; color:var(--text-primary); cursor:pointer;">
+                        <input type="checkbox" name="can_view_screenings" value="1" checked>
+                        <span>PHQ-9 & GAD-7 Psychometric Scores</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.45rem; font-size:0.9rem; color:var(--text-primary); cursor:pointer;">
+                        <input type="checkbox" name="can_view_wellness" value="1" checked>
+                        <span>Wellness & Self-Care Logs</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="perm_notes">Context or Focus Areas for Counselor (Optional)</label>
+                <input type="text" name="notes" id="perm_notes" class="booking-control" placeholder="e.g., Please focus on exam stress and sleep patterns during our upcoming consultation...">
+            </div>
+
+            <button type="submit" class="btn" style="margin-top:0.6rem;">
+                <i class="fa-solid fa-shield-halved"></i> Grant Counselor Access Permission
+            </button>
+        </form>
+
+        <!-- Active Permissions List -->
+        <h3 style="font-size:1.15rem; margin-bottom:1rem; color:var(--text-primary); display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-clipboard-check"></i> Current Counselor Access Permissions
+        </h3>
+        {% if permissions %}
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--card-border); text-align:left;">
+                            <th style="padding:0.75rem; font-size:0.85rem; color:var(--text-secondary);">Counselor</th>
+                            <th style="padding:0.75rem; font-size:0.85rem; color:var(--text-secondary);">Specialization</th>
+                            <th style="padding:0.75rem; font-size:0.85rem; color:var(--text-secondary);">Access Allowed Until</th>
+                            <th style="padding:0.75rem; font-size:0.85rem; color:var(--text-secondary);">Status</th>
+                            <th style="padding:0.75rem; font-size:0.85rem; color:var(--text-secondary);">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p_id, c_name, c_spec, p_until, can_j, can_s, can_w, p_status in permissions %}
+                            <tr style="border-bottom:1px solid var(--card-border);">
+                                <td style="padding:0.75rem; font-weight:600; color:var(--text-primary);">Dr. {{ c_name }}</td>
+                                <td style="padding:0.75rem; color:var(--text-secondary);">{{ c_spec }}</td>
+                                <td style="padding:0.75rem; color:var(--accent-primary); font-weight:600;">{{ p_until.strftime('%b %d, %Y') }}</td>
+                                <td style="padding:0.75rem;">
+                                    <span style="background:rgba(5,150,105,0.15); color:#059669; border:1px solid #059669; padding:0.25rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:700;">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                                <td style="padding:0.75rem;">
+                                    <form action="{{ url_for('api_permissions_revoke', perm_id=p_id) }}" method="POST" style="margin:0;">
+                                        <button type="submit" class="btn" style="background:#e11d48; padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="return confirm('Revoke counselor access immediately?')">
+                                            <i class="fa-solid fa-ban"></i> Revoke Access
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color:var(--text-muted); font-style:italic; margin:0;">
+                You have not granted clinical records access to any counselor yet. Your reflections remain 100% private.
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Raw slots data passed from flask
+    const allSlots = [
+        {% for s_id, s_c_id, c_name, s_time in slots %}
+            { id: {{ s_id }}, counselor_id: {{ s_c_id }}, time: "{{ s_time.strftime('%b %d, %Y %I:%M %p') }}" },
+        {% endfor %}
+    ];
+
+    let selectedCounselorId = null;
+
+    function selectCounselor(cId, cName) {
+        selectedCounselorId = cId;
+        document.getElementById('form-counselor-id').value = cId;
+        
+        // Toggle selected styling
+        const cards = document.querySelectorAll('.counselor-card');
+        cards.forEach(card => {
+            card.classList.toggle('selected', card.id === `card-counselor-${cId}`);
+        });
+
+        // Filter and populate slots dropdown
+        const slotSelect = document.getElementById('slot-select');
+        slotSelect.innerHTML = '<option value="">Choose an available slot</option>';
+        
+        const filtered = allSlots.filter(s => s.counselor_id === cId);
+        
+        if (filtered.length > 0) {
+            filtered.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = s.time;
+                slotSelect.appendChild(opt);
+            });
+            document.getElementById('book-btn').disabled = false;
+        } else {
+            slotSelect.innerHTML = '<option value="">No slots available for this counselor</option>';
+            document.getElementById('book-btn').disabled = true;
+        }
+    }
+</script>
+{% endblock %}

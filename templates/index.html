@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daylight — Sarathi Mindful Psychological Journaling & Vedic Cognitive Reframing</title>
+    
+    <!-- Instant Theme Initializer to prevent flicker -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+        }
+
+        /* Top Navigation Bar */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg-translucent);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1.1rem 3.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.8rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Container */
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8.5rem 2.5rem 5rem 2.5rem;
+        }
+
+        /* Daylight Hero 2-Column Grid */
+        .daylight-hero-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 3.5rem;
+            align-items: center;
+            margin-bottom: 5.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .daylight-hero-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            .landing-nav {
+                padding: 1rem 1.5rem;
+            }
+            .nav-menu {
+                display: none;
+            }
+            .landing-container {
+                padding-top: 6.5rem;
+            }
+        }
+
+        /* Simulator Card */
+        .simulator-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--box-shadow-card);
+            margin-bottom: 5rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 5rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 2rem;
+            box-shadow: var(--box-shadow-card);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+        }
+
+        .feature-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background: var(--accent-sage-light);
+            color: var(--accent-primary);
+        }
+
+        /* Footer */
+        .landing-footer {
+            border-top: 1px solid var(--card-border);
+            padding: 4rem 3.5rem 2.5rem 3.5rem;
+            background: var(--card-bg);
+            margin-top: 4rem;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="landing-nav">
+        <!-- Exact Daylight Brand Identity from Image -->
+        <a href="/" class="daylight-logo-pill">
+            <div class="daylight-logo-badge">d</div>
+            <span class="daylight-logo-title">daylight</span>
+        </a>
+
+        <ul class="nav-menu">
+            <li><a href="/dashboard"><i class="fa-solid fa-brain"></i> Journal & Chat</a></li>
+            <li><a href="/period"><i class="fa-solid fa-venus"></i> Period Wellness</a></li>
+            <li><a href="/forum"><i class="fa-solid fa-comments"></i> Peer Support</a></li>
+            <li><a href="/screenings"><i class="fa-solid fa-square-poll-vertical"></i> Screenings</a></li>
+            <li><a href="/booking"><i class="fa-solid fa-calendar-check"></i> Counselors</a></li>
+            <li><a href="/resources"><i class="fa-solid fa-wand-magic-sparkles"></i> Vedic Wisdom</a></li>
+            <li><a href="http://127.0.0.1:8000/docs" target="_blank"><i class="fa-solid fa-code"></i> API Docs</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Universal Theme Selector with Pill Button & Dropdown -->
+            <div class="theme-selector-wrapper">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemeDropdown(event)" title="Choose Theme Palette">
+                    <i class="fa-solid fa-sun" id="themeToggleIcon"></i>
+                    <span id="themeToggleText">Daylight Mode</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; opacity:0.6; margin-left:2px;"></i>
+                </button>
+                <div class="theme-dropdown-menu" id="themeDropdownMenu">
+                    <button type="button" class="theme-option-item active" data-theme-val="daylight" onclick="setSarathiTheme('daylight')">
+                        <span class="theme-color-dot" style="background:#284b3f;"></span>
+                        <span>Daylight (Sage & Cream)</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="amber" onclick="setSarathiTheme('amber')">
+                        <span class="theme-color-dot" style="background:#b45309;"></span>
+                        <span>Warm Amber (Dawn)</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="night" onclick="setSarathiTheme('night')">
+                        <span class="theme-color-dot" style="background:#8c52ff;"></span>
+                        <span>Midnight (Cosmic Dark)</span>
+                    </button>
+                </div>
+            </div>
+
+            {% if is_logged_in %}
+                <a href="/dashboard" class="btn" style="padding:0.6rem 1.3rem;">
+                    <span>My Dashboard</span> <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            {% else %}
+                <a href="/login" class="btn btn-secondary" style="font-size:0.9rem; padding:0.6rem 1.2rem;">
+                    Sign In
+                </a>
+                <a href="/login" class="btn" style="font-size:0.9rem; padding:0.6rem 1.2rem;">
+                    <span>Get Started</span> <i class="fa-solid fa-bolt"></i>
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="landing-container">
+        
+        <!-- Thought from the Community Banner (Exact match from user image: "Be happy, keep smiling." — Chahat Modi) -->
+        <section class="community-thought-banner">
+            <div>
+                <span class="thought-tag">A THOUGHT FROM THE COMMUNITY</span>
+                <div class="thought-quote" id="thoughtQuote">“Be happy, keep smiling.”</div>
+                <div class="thought-author" id="thoughtAuthor">— Chahat Modi</div>
+            </div>
+            <div class="thought-nav">
+                <span class="thought-counter" id="thoughtCounter">1 of 4</span>
+                <button type="button" class="thought-arrow-btn" onclick="prevCommunityThought()" aria-label="Previous Thought">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button type="button" class="thought-arrow-btn" onclick="nextCommunityThought()" aria-label="Next Thought">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Daylight Hero Section (Exact match from user image) -->
+        <section class="daylight-hero-grid">
+            <!-- Left Hero Content -->
+            <div>
+                <span class="daylight-hero-subtag">A LITTLE SPACE FOR YOUR DAY</span>
+                <h1 class="daylight-hero-heading">
+                    Make room for<br>what matters.
+                </h1>
+                <p class="daylight-hero-body">
+                    A calmer way to collect your thoughts, keep your next step close, and meet the moment you're in.
+                </p>
+                
+                <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+                    <a href="/dashboard" class="btn-daylight-pill">
+                        <span>Give me a little nudge</span> &nearr;
+                    </a>
+                    <a href="#simulator" class="btn btn-secondary" style="padding:0.9rem 1.6rem; border-radius:9999px;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Try Interactive Reframing</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Local Time Widget Card (Exact match from user image) -->
+            <div>
+                <div class="daylight-clock-card">
+                    <span class="daylight-clock-label">YOUR LOCAL TIME</span>
+                    <div class="daylight-clock-time" id="daylightClockTime">10:18:56 pm</div>
+                    <div class="daylight-clock-date" id="daylightClockDate">Tuesday, 27 October 2026</div>
+                    
+                    <div class="daylight-clock-footer">
+                        <span class="daylight-clock-dot" id="daylightClockDot"></span>
+                        <span id="daylightClockStatusText">Let the day soften into evening.</span>
+                    </div>
+
+                    <!-- Decorative corner watermark arc -->
+                    <div class="daylight-clock-arc"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Cognitive Reframing Live Simulator -->
+        <section id="simulator" class="simulator-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.8rem;">
+                <div style="display:flex; align-items:center; gap:0.7rem;">
+                    <i class="fa-solid fa-brain" style="color:var(--accent-primary); font-size:1.4rem;"></i>
+                    <h2 style="font-size:1.35rem; font-weight:700;">Experience Real-Time Cognitive Reframing</h2>
+                </div>
+                <span class="badge" style="background:var(--accent-sage-light); color:var(--accent-primary); border:1px solid var(--accent-primary); padding:0.35rem 0.8rem;">
+                    <i class="fa-solid fa-bolt"></i> Dual-Engine AI Live
+                </span>
+            </div>
+
+            <div style="position:relative; margin-bottom:1.2rem;">
+                <textarea id="demoInput" class="forum-input" placeholder="Type or speak how you feel right now (e.g. 'I feel completely overwhelmed by my upcoming exam and feel like a failure')..." style="min-height:95px; resize:vertical; padding-right:3.2rem; font-size:1rem;"></textarea>
+                <button type="button" id="demoMicBtn" onclick="startVoiceDictation('demoInput', 'demoMicBtn')" title="Dictate by Voice (Speech-to-Text)" style="position:absolute; right:12px; bottom:14px; background:var(--accent-sage-light); border:1px solid var(--accent-primary); color:var(--accent-primary); border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <span class="voicebot-chip" onclick="setDemoText('I feel exhausted and burned out from office deadlines')">💼 Burnout</span>
+                    <span class="voicebot-chip" onclick="setDemoText('I am anxious about failing my university semester')">📚 Exam Stress</span>
+                    <span class="voicebot-chip" onclick="setDemoText('I had an argument with a friend and feel lonely')">🫂 Loneliness</span>
+                    <span class="voicebot-chip" onclick="setDemoText('My body hurts and I feel drained during my period')">🌸 Cycle Exhaustion</span>
+                </div>
+                <button type="button" class="btn" id="demoSubmitBtn" onclick="runLiveDemo()" style="padding:0.75rem 1.6rem;">
+                    <span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Demo Result Container (Appears dynamically) -->
+            <div id="demoResult" style="display:none; margin-top:1.6rem; border-top:1px solid var(--card-border); padding-top:1.4rem; animation:fadeInDown 0.3s ease;">
+                <div style="display:flex; gap:0.6rem; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap;">
+                    <span id="demoMoodBadge" class="tag-category">Mood</span>
+                    <span id="demoContextBadge" class="tag-category" style="background:rgba(217, 119, 6, 0.12); border-color:#d97706; color:#d97706;">Context</span>
+                </div>
+
+                <p id="demoReframing" style="font-size:1.05rem; line-height:1.65; color:var(--text-primary); margin-bottom:1.2rem;">
+                    Reframing insight will appear here...
+                </p>
+
+                <div style="background:var(--accent-sage-light); border-left:4px solid var(--accent-primary); padding:1rem 1.4rem; border-radius:0 14px 14px 0; margin-bottom:1.2rem;">
+                    <div id="demoShlok" style="font-family:'Newsreader', 'Georgia', serif; font-size:1.15rem; color:var(--text-primary); font-weight:600; margin-bottom:0.3rem;">
+                        Sanskrit Shloka
+                    </div>
+                    <div id="demoShlokMeaning" style="font-size:0.92rem; color:var(--text-secondary); font-style:italic;">
+                        English commentary and timeless psychological principle.
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;">
+                    <div id="demoAffirmation" style="font-size:0.92rem; color:var(--accent-primary); font-weight:600;">
+                        💡 Affirmation
+                    </div>
+                    <button type="button" class="audio-btn" id="demoAudioBtn" onclick="speakDemoResult()" title="Listen to Voice Wisdom">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platform Ecosystem Features Grid -->
+        <section class="features-grid">
+            <a href="/dashboard" class="feature-card">
+                <div class="feature-icon-box"><i class="fa-solid fa-brain"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">AI Chatbot & Journal</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Empathetic conversational agent that processes thoughts with 30 moods, 15 life domains, and mood-adaptive ambient color shifts.
+                </p>
+            </a>
+
+            <a href="/period" class="feature-card">
+                <div class="feature-icon-box" style="color:#ec4899; background:rgba(236,72,153,0.12);"><i class="fa-solid fa-venus"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">Period Journal & Wellness</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Cycle logging, physical symptom tracking, vital energy sliders, and dynamic Vedic verses honoring natural bodily rhythms.
+                </p>
+            </a>
+
+            <a href="/forum" class="feature-card">
+                <div class="feature-icon-box"><i class="fa-solid fa-comments"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">Peer Support Forum</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Safe, anonymous community spaces across Student Life, Work, Physical Health, and Academic Stress with instant live search.
+                </p>
+            </a>
+
+            <a href="/screenings" class="feature-card">
+                <div class="feature-icon-box" style="color:#2563eb; background:rgba(37,99,235,0.12);"><i class="fa-solid fa-square-poll-vertical"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">Clinical Assessments</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Standardized PHQ-9 and GAD-7 screening instruments feeding a 5-feature sequential neural recommender engine.
+                </p>
+            </a>
+
+            <a href="/booking" class="feature-card">
+                <div class="feature-icon-box" style="color:#059669; background:rgba(5,150,105,0.12);"><i class="fa-solid fa-user-doctor"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">Counselor Appointments</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Connect with licensed psychologists, university counselors, and Vedic mental health professionals with instant slot booking.
+                </p>
+            </a>
+
+            <a href="/resources" class="feature-card">
+                <div class="feature-icon-box" style="color:#d97706; background:rgba(217,119,6,0.12);"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3 style="font-size:1.2rem; font-weight:700;">Vedic Wisdom Portal</h3>
+                <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.55;">
+                    Explore actionable psychological doctrines of <em>Nishkama Karma</em>, <em>Sthitaprajna</em>, and equanimity for modern living.
+                </p>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="footer-grid">
+            <div>
+                <div class="daylight-logo-pill" style="margin-bottom:0.8rem;">
+                    <div class="daylight-logo-badge">d</div>
+                    <span class="daylight-logo-title">daylight &bull; sarathi</span>
+                </div>
+                <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; max-width:320px;">
+                    An agentic mental wellbeing companion uniting ancient Indian cognitive psychology with modern natural language processing.
+                </p>
+            </div>
+            <div>
+                <strong style="color:var(--text-primary); font-size:0.95rem; display:block; margin-bottom:1rem;">Platform</strong>
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; font-size:0.88rem;">
+                    <li><a href="/dashboard" style="color:var(--text-secondary); text-decoration:none;">AI Reflection Journal</a></li>
+                    <li><a href="/period" style="color:var(--text-secondary); text-decoration:none;">Period Journal</a></li>
+                    <li><a href="/forum" style="color:var(--text-secondary); text-decoration:none;">Peer Support Forum</a></li>
+                    <li><a href="/screenings" style="color:var(--text-secondary); text-decoration:none;">Clinical Screenings</a></li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--text-primary); font-size:0.95rem; display:block; margin-bottom:1rem;">Developers & API</strong>
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; font-size:0.88rem;">
+                    <li><a href="http://127.0.0.1:8000/docs" target="_blank" style="color:var(--text-secondary); text-decoration:none;">FastAPI Swagger UI</a></li>
+                    <li><a href="http://127.0.0.1:8000/redoc" target="_blank" style="color:var(--text-secondary); text-decoration:none;">ReDoc Documentation</a></li>
+                    <li><a href="/admin/dashboard" style="color:var(--text-secondary); text-decoration:none;">Admin Governance</a></li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--text-primary); font-size:0.95rem; display:block; margin-bottom:1rem;">Emergency Crisis</strong>
+                <p style="color:var(--text-secondary); font-size:0.85rem; line-height:1.5;">
+                    Tele-MANAS: <strong>14416</strong><br>
+                    KIRAN: <strong>1800-599-0019</strong><br>
+                    National Helpline: <strong>112</strong>
+                </p>
+            </div>
+        </div>
+        <div style="max-width:1200px; margin:0 auto; padding-top:1.5rem; border-top:1px solid var(--card-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-size:0.85rem; color:var(--text-muted);">
+            <div>&copy; 2026 Sarathi BhagvadMood Platform. Built with care for compassionate human wellbeing.</div>
+            <div style="display:flex; gap:1.2rem;">
+                <span>Thought from Community by Chahat Modi</span>
+                <a href="#top" style="color:var(--text-secondary); text-decoration:none;">Back to top &uarr;</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function setDemoText(txt) {
+            document.getElementById('demoInput').value = txt;
+            runLiveDemo();
+        }
+
+        let lastDemoResult = null;
+
+        function runLiveDemo() {
+            const input = document.getElementById('demoInput');
+            const text = input.value.trim();
+            if (!text) {
+                alert("Please enter a sentence or choose an example chip.");
+                return;
+            }
+
+            const btn = document.getElementById('demoSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reflecting...';
+
+            fetch('/api/sentiment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>';
+
+                lastDemoResult = data;
+                const resultBox = document.getElementById('demoResult');
+                resultBox.style.display = 'block';
+
+                document.getElementById('demoMoodBadge').innerText = `Mood: ${data.mood.toUpperCase()}`;
+                document.getElementById('demoContextBadge').innerText = `Context: ${data.context || 'General Wellbeing'}`;
+                document.getElementById('demoReframing').innerText = data.reframing || 'Take a calming breath. Every moment offers a new beginning.';
+                document.getElementById('demoShlok').innerText = `📜 ${data.shlok || 'भगवद्गीता ज्ञानम्'}`;
+                document.getElementById('demoShlokMeaning').innerText = data.shlok_meaning || 'Timeless wisdom for emotional equipoise.';
+                document.getElementById('demoAffirmation').innerText = `💡 Affirmation: "${data.affirmation || 'I am grounded and present.'}"`;
+
+                if (typeof applyMoodAmbientTheme === 'function') {
+                    applyMoodAmbientTheme(data.mood);
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>';
+                alert("Could not process reflection right now. Please verify server connection.");
+            });
+        }
+
+        function speakDemoResult() {
+            if (!lastDemoResult) return;
+            const text = `${lastDemoResult.reframing}. ${lastDemoResult.shlok_meaning}. Affirmation: ${lastDemoResult.affirmation}`;
+            speakWisdom(text, document.getElementById('demoAudioBtn'));
+        }
+
+        // Initialize clock on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof updateDaylightClock === 'function') updateDaylightClock();
+            if (typeof renderCommunityThought === 'function') renderCommunityThought();
+        });
+    </script>
+</body>
+</html>

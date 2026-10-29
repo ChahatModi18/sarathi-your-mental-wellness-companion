@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Review: {{ client_data.username }} — Sarathi</title>
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 2.5rem;
+        }
+
+        .review-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .client-meta-banner {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .meta-group {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .client-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-sage-light);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .consent-badge {
+            background: rgba(5, 150, 105, 0.12);
+            border: 1px solid #059669;
+            color: #047857;
+            padding: 0.4rem 0.9rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .card-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .clinical-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .clinical-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .journal-item {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .journal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-tag {
+            background: var(--accent-sage-light);
+            color: var(--accent-primary);
+            font-weight: 700;
+            padding: 0.25rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .btn-back {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 0.65rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--card-border);
+        }
+
+        @media (max-width: 850px) {
+            .card-grid-2 { grid-template-columns: 1fr; }
+            body { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="review-container">
+        <div class="header-bar">
+            <div>
+                <a href="{{ url_for('counselor_dashboard') }}" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Counselor Console
+                </a>
+            </div>
+            <div style="font-size: 0.95rem; color: var(--text-secondary);">
+                Client Clinical Evaluation & Longitudinal Progress Record
+            </div>
+        </div>
+
+        <div class="client-meta-banner">
+            <div class="meta-group">
+                <div class="client-avatar">
+                    {{ client_data.username[0]|upper }}
+                </div>
+                <div>
+                    <h2 style="font-size:1.6rem; color:var(--text-primary); margin-bottom:0.25rem;">
+                        {{ client_data.username }}
+                    </h2>
+                    <div style="color:var(--text-secondary); font-size:0.92rem; display:flex; gap:1.2rem; flex-wrap:wrap;">
+                        <span><i class="fa-solid fa-venus-mars"></i> {{ client_data.gender|capitalize }}</span>
+                        <span><i class="fa-solid fa-cake-candles"></i> Age: {{ client_data.age or 'Not recorded' }}</span>
+                        <span><i class="fa-solid fa-fire" style="color:#ef4444;"></i> Streak: {{ client_data.journal_streak or 0 }} Days</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="consent-badge">
+                    <i class="fa-solid fa-lock-open"></i> Clinical Consent Valid Until: {{ permission.allowed_until.strftime('%b %d, %Y') }}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-grid-2">
+            <!-- Left: Reflection History -->
+            <div class="clinical-card">
+                <div class="clinical-card-title">
+                    <i class="fa-solid fa-brain" style="color:var(--accent-primary);"></i>
+                    <span>Recent Reflections & Mood Stream</span>
+                </div>
+
+                {% if journals %}
+                    {% for j in journals %}
+                        <div class="journal-item">
+                            <div class="journal-header">
+                                <span class="mood-tag">{{ j[1]|capitalize }}</span>
+                                <span style="font-size:0.8rem; color:var(--text-muted);">{{ j[5].strftime('%b %d, %I:%M %p') }}</span>
+                            </div>
+                            <p style="font-size:0.93rem; color:var(--text-primary); margin-bottom:0.6rem; line-height:1.5;">
+                                "{{ j[2] }}"
+                            </p>
+                            {% if j[3] %}
+                                <div style="font-size:0.82rem; color:var(--text-secondary); font-style:italic; border-left:2px solid var(--accent-primary); padding-left:0.6rem;">
+                                    <strong>Vedic Focus:</strong> {{ j[3] }} — {{ j[4] }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:var(--text-muted); font-style:italic;">No reflections recorded by this client yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Right: Psychometrics & Screenings -->
+            <div class="clinical-card">
+                <div class="clinical-card-title">
+                    <i class="fa-solid fa-chart-line" style="color:var(--accent-primary);"></i>
+                    <span>Clinical Psychometric Screenings</span>
+                </div>
+
+                {% if screenings %}
+                    {% for s in screenings %}
+                        <div class="score-row">
+                            <div>
+                                <strong style="font-size:1.02rem; color:var(--text-primary);">{{ s[3] }}</strong>
+                                <div style="font-size:0.82rem; color:var(--text-muted);">{{ s[1].strftime('%b %d, %Y') }}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:1.15rem; font-weight:700; color:var(--text-primary);">Score: {{ s[4] }}</div>
+                                <span class="badge" style="background:var(--accent-sage-light); color:var(--accent-primary); font-size:0.75rem; padding:0.2rem 0.5rem; border-radius:6px; font-weight:600;">
+                                    {{ s[5] }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:var(--text-muted); font-style:italic;">No PHQ-9 or GAD-7 screening assessments completed yet.</p>
+                {% endif %}
+
+                <div style="margin-top: 2rem; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.25rem;">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+                        <i class="fa-solid fa-stethoscope"></i> Counselor Clinical Recommendation
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                        {% if client_data.diagnosed_conditions %}
+                            <strong>Reported Conditions:</strong> {{ client_data.diagnosed_conditions }}<br>
+                        {% endif %}
+                        Review cognitive distortions (catastrophizing, all-or-nothing thinking) alongside their current journal entries during upcoming sessions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,812 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Chatbot / Journal{% endblock %}
+
+{% block style %}
+<style>
+    .split-layout {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 2rem;
+    }
+
+    .form-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .history-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .prompt-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--chip-bg);
+        border: 1px solid var(--chip-border);
+        padding: 0.85rem 1.25rem;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        margin-bottom: 1.2rem;
+    }
+
+    .prompt-refresh-btn {
+        background: none;
+        border: none;
+        color: var(--accent-primary);
+        cursor: pointer;
+        padding: 0.4rem;
+        transition: transform 0.3s ease;
+    }
+
+    .prompt-refresh-btn:hover {
+        transform: rotate(180deg);
+        color: var(--accent-hover);
+    }
+
+    .textarea-glowing {
+        width: 100%;
+        min-height: 240px;
+        max-height: 520px;
+        background: var(--input-bg);
+        border: 1.5px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.4rem 1.6rem;
+        color: var(--text-primary);
+        font-family: var(--font-sub);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        resize: vertical;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+    }
+
+    .textarea-glowing::placeholder {
+        color: var(--text-muted);
+        opacity: 0.75;
+    }
+
+    .textarea-glowing:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 4px rgba(40, 75, 63, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .textarea-counter {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: 0.4rem;
+        font-family: var(--font-sub);
+    }
+
+    /* AI Analysis result card */
+    .analysis-card {
+        background: var(--card-bg);
+        border: 1.5px solid var(--card-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-glow);
+        display: none;
+        animation: fadeInUp 0.45s ease forwards;
+        padding: 1.6rem;
+    }
+
+    .mood-badge {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 30px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-family: var(--font-main);
+        letter-spacing: 0.5px;
+    }
+
+    .mood-happy, .mood-positive, .mood-grateful, .mood-hopeful, .mood-content, .mood-ecstatic {
+        background: rgba(0, 230, 118, 0.15);
+        border: 1px solid var(--accent-secondary);
+        color: #79ffb2;
+    }
+    
+    .mood-neutral, .mood-okay {
+        background: rgba(255, 234, 0, 0.1);
+        border: 1px solid var(--accent-warning);
+        color: #fffa79;
+    }
+
+    .mood-sad, .mood-negative, .mood-depressed, .mood-very_sad, .mood-lonely, .mood-worthless, .mood-discouraged, .mood-devastated {
+        background: rgba(140, 82, 255, 0.15);
+        border: 1px solid var(--accent-primary);
+        color: #cfafff;
+    }
+
+    .mood-anxious, .mood-stressed, .mood-overwhelmed, .mood-restless, .mood-angry {
+        background: rgba(255, 23, 68, 0.15);
+        border: 1px solid var(--accent-alert);
+        color: #ff9fb0;
+    }
+
+    .shlok-text {
+        font-family: 'Georgia', serif;
+        font-size: 1.15rem;
+        font-style: italic;
+        color: #ffea79;
+        text-align: center;
+        margin: 1rem 0 0.5rem 0;
+        line-height: 1.6;
+    }
+
+    .shlok-meaning {
+        font-family: var(--font-sub);
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 1.2rem;
+    }
+
+    /* History Cards */
+    .history-item {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.25rem 1.4rem;
+        transition: all 0.25s ease;
+        position: relative;
+        box-shadow: var(--box-shadow-card);
+    }
+
+    .history-item:hover {
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+    }
+
+    .history-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .history-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-family: var(--font-sub);
+    }
+
+    .delete-entry-btn {
+        background: none;
+        border: none;
+        color: #ff6b81;
+        cursor: pointer;
+        font-size: 0.85rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        transition: background 0.2s ease;
+    }
+
+    .delete-entry-btn:hover {
+        background: rgba(255, 107, 129, 0.15);
+    }
+
+    .search-input-box {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        color: var(--text-primary);
+        font-family: var(--font-sub);
+        font-size: 0.92rem;
+        transition: all 0.2s ease;
+    }
+
+    .search-input-box:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+    }
+
+    .analytics-panel {
+        display: none;
+        animation: fadeInUp 0.4s ease forwards;
+    }
+
+    @media (max-width: 1024px) {
+        .split-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="split-layout">
+    <!-- Journal Entry Panel -->
+    <div class="form-panel">
+        <div class="card" style="margin-bottom: 0;">
+            <!-- Multi-Account / Profile Quick Switcher -->
+            <div style="background:var(--input-bg); border:1px solid var(--card-border); border-radius:14px; padding:0.75rem 1.1rem; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <i class="fa-solid fa-users-gear" style="color:var(--accent-primary);"></i>
+                    <span style="font-size:0.88rem; color:var(--text-secondary);">Active Profile:</span>
+                    <strong style="color:var(--text-primary); font-size:0.95rem;">
+                        {{ session.get('active_profile_name', session.get('username')) }}
+                        {% if session.get('active_relationship') and session.get('active_relationship') != 'Self' %}
+                            <span style="font-size:0.8rem; font-weight:normal; opacity:0.85;">({{ session.get('active_relationship') }})</span>
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    {% if profiles %}
+                        <div class="dropdown" style="position:relative; display:inline-block;">
+                            <button type="button" onclick="document.getElementById('dashProfileDropdown').classList.toggle('show')" style="background:var(--card-bg); border:1px solid var(--card-border); color:var(--text-primary); padding:0.4rem 0.8rem; border-radius:10px; font-size:0.82rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+                                <i class="fa-solid fa-repeat"></i> Switch <i class="fa-solid fa-chevron-down" style="font-size:0.7rem;"></i>
+                            </button>
+                            <div id="dashProfileDropdown" style="display:none; position:absolute; right:0; top:calc(100% + 5px); background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; min-width:180px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:100; overflow:hidden;">
+                                <a href="{{ url_for('api_profile_switch', profile_id=0) }}" style="display:block; padding:0.6rem 1rem; color:var(--text-primary); text-decoration:none; font-size:0.85rem; border-bottom:1px solid var(--card-border);">
+                                    <i class="fa-solid fa-user"></i> Primary ({{ session.get('username') }})
+                                </a>
+                                {% for p in profiles %}
+                                    <a href="{{ url_for('api_profile_switch', profile_id=p[0]) }}" style="display:block; padding:0.6rem 1rem; color:var(--text-primary); text-decoration:none; font-size:0.85rem; border-bottom:1px solid var(--card-border);">
+                                        <i class="fa-solid fa-user-tag"></i> {{ p[1] }} ({{ p[2] }})
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <a href="{{ url_for('period') }}" style="background:var(--accent-sage-light); border:1px solid var(--card-border); color:var(--accent-primary); padding:0.4rem 0.8rem; border-radius:10px; font-size:0.82rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;">
+                        <i class="fa-solid fa-user-plus"></i> Manage Dependents
+                    </a>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-feather-pointed"></i> Daily Reflection Stream</h2>
+                <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem;" onclick="toggleBreathingCoach(true)">
+                    <i class="fa-solid fa-wind"></i> <span>Breathing Coach</span>
+                </button>
+            </div>
+
+            <!-- Mindful Inspiration Prompt -->
+            <div class="prompt-box">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <i class="fa-solid fa-sparkles" style="color:#ffea00;"></i>
+                    <span id="mindful-prompt-text">What is one gentle kindness you can offer yourself today?</span>
+                </div>
+                <button type="button" class="prompt-refresh-btn" onclick="nextPrompt()" title="Generate another mindful prompt">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+            
+            <form id="journal-form">
+                <div style="position:relative;">
+                    <textarea name="thought" id="journal-thought" class="textarea-glowing" placeholder="How are you feeling right now? Unload whatever is heavy or whatever you are grateful for..." required></textarea>
+                    <button type="button" id="journal-mic-btn" onclick="startVoiceDictation('journal-thought', 'journal-mic-btn')" title="Voice Dictation (Speech-to-Text)" style="position:absolute; right:12px; bottom:16px; background:rgba(140,82,255,0.25); border:1px solid rgba(140,82,255,0.4); color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s ease;">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
+                
+                <div class="textarea-counter">
+                    <span id="word-count-badge">0 words | 0 characters</span>
+                    <span id="sentiment-indicator" style="color:#b388ff;"><i class="fa-solid fa-heart-pulse"></i> Ready for analysis</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="toggleAnalyticsDrawer()" id="toggle-analytics-btn">
+                        <i class="fa-solid fa-chart-pie"></i> <span>Mood Velocity</span>
+                    </button>
+                    <button type="submit" class="btn" id="journal-submit-btn">
+                        <span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dynamic Mood Analytics Drawer -->
+        <div class="card analytics-panel" id="mood-analytics-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.8rem;">
+                <h3 style="font-size:1.2rem; color:white;"><i class="fa-solid fa-chart-simple"></i> Emotional Velocity & Spectrum Breakdown</h3>
+                <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.7rem; font-size:0.8rem;" onclick="toggleAnalyticsDrawer()">Close</button>
+            </div>
+            <div style="max-height: 260px; display:flex; justify-content:center;">
+                <canvas id="moodDoughnutChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Dynamic AI Analysis Results -->
+        <div class="card analysis-card" id="analysis-result-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem; margin-bottom:1.2rem;">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <h3 style="font-size:1.25rem; color:var(--text-primary);"><i class="fa-solid fa-dharmachakra" style="color:#ffd700;"></i> Sarathi Vedic Guidance</h3>
+                    <button type="button" class="audio-btn" id="listen-reframe-btn" title="Listen to Shloka & Reflection" onclick="speakCurrentAnalysis()">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <span id="res-context" style="font-size:0.8rem; background:rgba(255,255,255,0.08); padding:0.3rem 0.7rem; border-radius:20px; color:var(--text-secondary);">General</span>
+                    <span class="mood-badge" id="res-mood">PEACEFUL</span>
+                </div>
+            </div>
+
+            <!-- Crisis Section -->
+            <div id="crisis-alert" style="display:none; background:rgba(255,23,68,0.15); border:1px solid var(--accent-alert); border-radius:16px; padding:1.2rem;" class="crisis-pulse">
+                <strong style="color:#ffcbd4; display:block; margin-bottom:0.6rem; font-size:1.1rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Immediate Compassionate Support Available
+                </strong>
+                <p id="crisis-msg" style="color:#ffcbd4; font-size:0.92rem; line-height:1.6;"></p>
+                <div style="margin-top:1rem; display:flex; gap:0.8rem; flex-wrap:wrap;">
+                    <a href="tel:14416" class="btn" style="background:#ff1744; font-size:0.9rem; padding:0.5rem 1rem;">
+                        <i class="fa-solid fa-phone"></i> Tele-MANAS (14416)
+                    </a>
+                    <a href="tel:18005990019" class="btn" style="background:#ff5252; font-size:0.9rem; padding:0.5rem 1rem;">
+                        <i class="fa-solid fa-phone"></i> KIRAN (1800-599-0019)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Normal Reframe Section -->
+            <div id="standard-reframe">
+                <div class="shlok-text" id="res-shlok">कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।</div>
+                <div class="shlok-meaning" id="res-meaning">You have a right to perform your duties, but never to the fruits of those actions.</div>
+                
+                <div style="margin-top:1.2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.4rem;">
+                        <strong style="color:var(--text-primary); font-size:1.05rem;">
+                            <i class="fa-solid fa-hand-holding-heart" style="color:#b388ff;"></i> Cognitive Reframing Insight
+                        </strong>
+                        <span id="res-lens" style="font-size:0.8rem; color:#ffd700; font-family:var(--font-title);"></span>
+                    </div>
+                    <p id="res-insight" style="font-size:0.95rem; line-height:1.6; color:var(--text-secondary);"></p>
+                </div>
+
+                <!-- Uplifting Contextual Affirmation -->
+                <div id="res-affirmation-box" style="display:none; margin-top:0.9rem; padding:0.9rem 1.2rem; background:rgba(255,215,0,0.06); border-left:3px solid #ffd700; border-radius:0 14px 14px 0;">
+                    <strong style="color:#ffd700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-sparkles"></i> Contextual Affirmation:
+                    </strong>
+                    <p id="res-affirmation" style="color:var(--text-primary); font-size:1.05rem; font-style:italic; margin:0.3rem 0 0 0; font-family:var(--font-main);"></p>
+                </div>
+
+                <!-- Actionable Mini-Goal Card -->
+                <div id="mini-goal-container" style="display:none;" class="mini-goal-card">
+                    <div>
+                        <strong style="color:#ffea00; display:block; font-size:0.95rem; margin-bottom:0.2rem;">
+                            <i class="fa-solid fa-bullseye"></i> Personalized Mindful Mini-Goal
+                        </strong>
+                        <span id="mini-goal-text" style="color:var(--text-primary); font-size:0.9rem;"></span>
+                    </div>
+                    <button type="button" class="mini-goal-btn" id="claim-mini-goal-btn" onclick="claimGoalReward()">
+                        <i class="fa-solid fa-award"></i> Complete (+<span id="goal-reward-pts">25</span> MP)
+                    </button>
+                </div>
+
+                <div id="points-celebration" style="display:none; margin-top:1.2rem; padding:0.8rem 1.2rem; background:rgba(0,230,118,0.12); border:1px solid var(--accent-secondary); border-radius:12px; color:#b9ffd9; font-size:0.95rem; font-weight:600; text-align:center;">
+                    <i class="fa-solid fa-star"></i> <span id="points-won-msg">You earned Mindful Points!</span>
+                </div>
+
+                <div id="trend-feedback" style="display:none; margin-top:0.8rem; padding:0.7rem 1.1rem; background:rgba(255,234,0,0.1); border:1px solid var(--accent-warning); border-radius:12px; color:#fffa79; font-size:0.9rem;">
+                    <i class="fa-solid fa-chart-line"></i> <span id="trend-msg">Trend feedback goes here</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Panel with Search & Filter Chips (Desktop EntriesFrame Parity) -->
+    <div class="history-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-size:1.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Journal Journey</h2>
+            <a href="{{ url_for('export_data', format='csv') }}" class="btn btn-secondary" style="font-size:0.8rem; padding:0.4rem 0.8rem;" title="Export past entries to CSV">
+                <i class="fa-solid fa-file-arrow-down"></i> CSV
+            </a>
+        </div>
+
+        <!-- Live Instant Search & Filter Chips -->
+        <div style="position:relative; margin-top:0.5rem;">
+            <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:1rem; top:0.85rem; color:var(--text-secondary); font-size:0.9rem;"></i>
+            <input type="text" id="journal-search-input" class="search-input-box" placeholder="Search thoughts, Shlokas, or keywords..." onkeyup="filterJournalCards()">
+        </div>
+
+        <div class="mood-chip-group">
+            <span class="mood-chip active" onclick="filterByMood('all', this)">All</span>
+            <span class="mood-chip" onclick="filterByMood('happy', this)">Happy</span>
+            <span class="mood-chip" onclick="filterByMood('peaceful', this)">Peaceful</span>
+            <span class="mood-chip" onclick="filterByMood('anxious', this)">Anxious</span>
+            <span class="mood-chip" onclick="filterByMood('sad', this)">Sad</span>
+            <span class="mood-chip" onclick="filterByMood('overwhelmed', this)">Overwhelmed</span>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:1rem;" id="journal-history-list">
+            {% if journals %}
+                {% for row in journals %}
+                    {% set entry_id = row[0] %}
+                    {% set mood = row[1] %}
+                    {% set thought = row[2] %}
+                    {% set shlok = row[3] %}
+                    {% set meaning = row[4] %}
+                    {% set timestamp = row[5] %}
+                    
+                    <div class="history-item" data-mood="{{ mood.lower() }}" data-id="{{ entry_id }}">
+                        <div class="history-meta">
+                            <span class="mood-badge mood-{{ mood.lower() }}" onclick="if(typeof applyMoodAmbientTheme==='function') applyMoodAmbientTheme('{{ mood }}')" style="cursor:pointer;" title="Click to view {{ mood }} ambient theme">{{ mood }}</span>
+                            <div style="display:flex; align-items:center; gap:0.6rem;">
+                                <button type="button" class="audio-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="speakWisdom('{{ shlok|e }} - {{ meaning|e }}', this)" title="Listen to verse">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                                <span class="history-date">{{ timestamp.strftime('%b %d, %Y %I:%M %p') }}</span>
+                                <button type="button" class="delete-entry-btn" onclick="deleteEntry({{ entry_id }}, this)" title="Delete reflection">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="history-thought" style="color:var(--text-primary); font-size:0.98rem; margin-bottom:0.8rem; font-family:var(--font-sub); line-height:1.6;">"{{ thought }}"</p>
+                        
+                        {% if shlok %}
+                        <div class="history-shlok" style="font-size:0.92rem; font-family:'Newsreader', 'Georgia', serif; color:var(--accent-primary); margin-top:0.6rem; border-top:1px solid var(--card-border); padding-top:0.6rem; font-style:italic;">
+                            {{ shlok }}
+                        </div>
+                        {% endif %}
+                        {% if meaning %}
+                        <div class="history-meaning" style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; font-family:var(--font-sub);">
+                            Meaning: {{ meaning }}
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="card" style="text-align:center; padding:3rem; background:rgba(255,255,255,0.01);" id="empty-state-card">
+                    <i class="fa-solid fa-spa" style="font-size:2.5rem; color:#8c52ff; margin-bottom:1rem; opacity:0.6;"></i>
+                    <p>No reflections recorded yet. Write your thoughts above to receive Vedic equanimity insights!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Square Breathing Coach Modal -->
+<div class="breathing-coach-modal" id="breathing-coach-modal">
+    <div style="text-align:center; color:white; max-width:480px; padding:2rem;">
+        <h2 style="font-size:2rem; margin-bottom:0.5rem;"><i class="fa-solid fa-wind" style="color:#00e676;"></i> 4-4-4-4 Square Breathing</h2>
+        <p style="color:var(--text-secondary); margin-bottom:2rem; font-size:0.95rem;">Follow the mandala to regulate your nervous system and return to calm equanimity.</p>
+
+        <div class="breathing-circle-outer">
+            <div class="breathing-circle" id="mandala-circle">
+                <span id="mandala-counter" style="font-size:2.5rem; font-weight:800; color:white;">4</span>
+            </div>
+        </div>
+
+        <h3 id="mandala-label" style="font-size:1.3rem; color:#b9ffd9; margin-bottom:2rem;">Inhale Slowly...</h3>
+
+        <button type="button" class="btn btn-secondary" onclick="toggleBreathingCoach(false)">
+            <span>Finish Exercise</span> <i class="fa-solid fa-check"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Mindful Prompts Generator
+    const MINDFUL_PROMPTS = [
+        "What is one gentle kindness you can offer yourself today?",
+        "What heavy burden can you give yourself permission to set down right now?",
+        "What is within your sphere of control at this exact moment?",
+        "Describe a quiet moment today where you felt grounded or safe.",
+        "What expectation can you soften without judging yourself?",
+        "If a loved friend felt this way, what compassionate advice would you offer them?"
+    ];
+    let promptIndex = 0;
+
+    function nextPrompt() {
+        promptIndex = (promptIndex + 1) % MINDFUL_PROMPTS.length;
+        document.getElementById('mindful-prompt-text').innerText = MINDFUL_PROMPTS[promptIndex];
+    }
+
+    // Word & Character Counter
+    const thoughtField = document.getElementById('journal-thought');
+    const wordBadge = document.getElementById('word-count-badge');
+    const sentimentInd = document.getElementById('sentiment-indicator');
+
+    thoughtField.addEventListener('input', () => {
+        const text = thoughtField.value.trim();
+        const chars = text.length;
+        const words = text ? text.split(/\s+/).length : 0;
+        wordBadge.innerText = `${words} words | ${chars} characters`;
+
+        if (words > 6) {
+            sentimentInd.innerHTML = '<i class="fa-solid fa-brain" style="color:#00e676;"></i> Ready for sentiment reframing';
+        } else {
+            sentimentInd.innerHTML = '<i class="fa-solid fa-heart-pulse"></i> Writing...';
+        }
+    });
+
+    // Current Analysis Audio Voice Synthesis
+    let currentShlokAudio = "";
+    let currentInsightAudio = "";
+
+    function speakCurrentAnalysis() {
+        const textToSpeak = `${currentShlokAudio}. Reflection: ${currentInsightAudio}`;
+        speakWisdom(textToSpeak, document.getElementById('listen-reframe-btn'));
+    }
+
+    // Dynamic Mini-Goal Stash
+    let activeMiniGoalReward = 25;
+    let activeMiniGoalDesc = "";
+
+    function claimGoalReward() {
+        const btn = document.getElementById('claim-mini-goal-btn');
+        completeMiniGoal(activeMiniGoalReward, activeMiniGoalDesc, btn);
+    }
+
+    // Filter Journal Cards by Search & Mood
+    let selectedMoodFilter = 'all';
+
+    function filterByMood(mood, element) {
+        selectedMoodFilter = mood;
+        document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
+        if (element) element.classList.add('active');
+        if (mood !== 'all' && typeof applyMoodAmbientTheme === 'function') {
+            applyMoodAmbientTheme(mood);
+        } else if (mood === 'all' && typeof resetMoodAmbientTheme === 'function') {
+            resetMoodAmbientTheme();
+        }
+        filterJournalCards();
+    }
+
+    function filterJournalCards() {
+        const query = document.getElementById('journal-search-input').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('#journal-history-list .history-item');
+
+        cards.forEach(card => {
+            const cardMood = card.getAttribute('data-mood') || '';
+            const thoughtText = (card.querySelector('.history-thought')?.innerText || '').toLowerCase();
+            const shlokText = (card.querySelector('.history-shlok')?.innerText || '').toLowerCase();
+
+            const matchesMood = (selectedMoodFilter === 'all' || cardMood === selectedMoodFilter);
+            const matchesQuery = (!query || thoughtText.includes(query) || shlokText.includes(query));
+
+            if (matchesMood && matchesQuery) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Delete Journal Entry Action
+    function deleteEntry(entryId, buttonElement) {
+        if (!confirm("Are you sure you want to delete this reflection?")) return;
+        const card = buttonElement.closest('.history-item');
+        card.style.opacity = '0.5';
+
+        fetch(`/api/journal/delete/${entryId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.transform = 'scale(0.9)';
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 300);
+                } else {
+                    alert("Could not delete entry.");
+                    card.style.opacity = '1';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                card.style.opacity = '1';
+            });
+    }
+
+    // Mood Velocity Analytics Drawer
+    let moodChartInstance = null;
+
+    function toggleAnalyticsDrawer() {
+        const panel = document.getElementById('mood-analytics-card');
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+        } else {
+            panel.style.display = 'block';
+            loadMoodChart();
+        }
+    }
+
+    function loadMoodChart() {
+        fetch('/api/analytics')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('moodDoughnutChart').getContext('2d');
+                const labels = Object.keys(data.mood_counts).map(m => m.charAt(0).toUpperCase() + m.slice(1));
+                const counts = Object.values(data.mood_counts);
+
+                if (labels.length === 0) {
+                    labels.push('Peaceful', 'Content');
+                    counts.push(1, 1);
+                }
+
+                if (moodChartInstance) moodChartInstance.destroy();
+
+                moodChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: [
+                                '#8c52ff', '#00e676', '#ffea00', '#ff1744', '#00b0ff', '#ff914d', '#7209b7'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#ffffff', font: { family: 'Outfit', size: 12 } }
+                            }
+                        }
+                    }
+                });
+            });
+    }
+
+    // Main Journal Form Submission
+    document.getElementById('journal-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('journal-submit-btn');
+        const thought = thoughtField.value.trim();
+        if (!thought) return;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span>Reframing...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
+        
+        const formData = new FormData();
+        formData.append('thought', thought);
+        
+        fetch("{{ url_for('journal_submit') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>';
+            
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            
+            // Show result card
+            const resCard = document.getElementById('analysis-result-card');
+            resCard.style.display = 'block';
+            
+            const moodBadge = document.getElementById('res-mood');
+            moodBadge.innerText = data.mood;
+            moodBadge.className = 'mood-badge mood-' + data.mood.toLowerCase();
+            if (typeof applyMoodAmbientTheme === 'function') applyMoodAmbientTheme(data.mood);
+
+            document.getElementById('res-context').innerText = data.context || 'General Wellbeing';
+            
+            if (data.level === 'crisis') {
+                document.getElementById('crisis-alert').style.display = 'block';
+                document.getElementById('crisis-msg').innerText = data.message;
+                document.getElementById('standard-reframe').style.display = 'none';
+            } else {
+                document.getElementById('crisis-alert').style.display = 'none';
+                document.getElementById('standard-reframe').style.display = 'block';
+                
+                document.getElementById('res-shlok').innerText = data.shlok;
+                document.getElementById('res-meaning').innerText = data.meaning;
+                const reframingText = data.reframing || data.insight || "";
+                document.getElementById('res-insight').innerText = reframingText;
+
+                if (data.philosophical_lens) {
+                    document.getElementById('res-lens').innerText = "• " + data.philosophical_lens;
+                } else {
+                    document.getElementById('res-lens').innerText = "";
+                }
+
+                const affBox = document.getElementById('res-affirmation-box');
+                if (data.affirmation) {
+                    affBox.style.display = 'block';
+                    document.getElementById('res-affirmation').innerText = `"${data.affirmation}"`;
+                } else {
+                    affBox.style.display = 'none';
+                }
+
+                currentShlokAudio = data.shlok;
+                currentInsightAudio = data.meaning + ". " + reframingText + (data.affirmation ? ". Affirmation: " + data.affirmation : "");
+                
+                // Mini-Goal Card
+                const goalBox = document.getElementById('mini-goal-container');
+                if (data.mini_goal) {
+                    goalBox.style.display = 'flex';
+                    document.getElementById('mini-goal-text').innerText = data.mini_goal.goal;
+                    document.getElementById('goal-reward-pts').innerText = data.mini_goal.reward;
+                    activeMiniGoalReward = data.mini_goal.reward;
+                    activeMiniGoalDesc = data.mini_goal.goal;
+                } else {
+                    goalBox.style.display = 'none';
+                }
+
+                // Points celebration
+                const celebration = document.getElementById('points-celebration');
+                if (data.points_awarded > 0) {
+                    celebration.style.display = 'block';
+                    let wonMsg = `You earned ${data.points_awarded} Mindful Points (MP)!`;
+                    if (data.badge_alert) wonMsg += ` ${data.badge_alert}`;
+                    document.getElementById('points-won-msg').innerText = wonMsg;
+                    triggerConfetti();
+                } else {
+                    celebration.style.display = 'none';
+                }
+                
+                // Trend alert
+                const trendBox = document.getElementById('trend-feedback');
+                if (data.trend_feedback) {
+                    trendBox.style.display = 'block';
+                    document.getElementById('trend-msg').innerText = data.trend_feedback;
+                } else {
+                    trendBox.style.display = 'none';
+                }
+            }
+            
+            // Prepend new history item
+            const historyList = document.getElementById('journal-history-list');
+            const placeholder = document.getElementById('empty-state-card');
+            if (placeholder) placeholder.remove();
+            
+            const timestamp = new Date().toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+            
+            const newItemHtml = `
+                <div class="history-item" data-mood="${data.mood.toLowerCase()}" style="animation: fadeInUp 0.4s ease forwards;">
+                    <div class="history-meta">
+                        <span class="mood-badge mood-${data.mood.toLowerCase()}">${data.mood}</span>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <button type="button" class="audio-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="speakWisdom('${data.shlok ? data.shlok.replace(/'/g, "\\'") : ''} - ${data.meaning ? data.meaning.replace(/'/g, "\\'") : ''}', this)" title="Listen to verse">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <span class="history-date">${timestamp}</span>
+                        </div>
+                    </div>
+                    <p class="history-thought" style="color:var(--text-primary); font-size:0.98rem; margin-bottom:0.8rem; font-family:var(--font-sub); line-height:1.6;">"${thought}"</p>
+                    <div class="history-shlok" style="font-size:0.92rem; font-family:'Newsreader', 'Georgia', serif; color:var(--accent-primary); margin-top:0.6rem; border-top:1px solid var(--card-border); padding-top:0.6rem; font-style:italic;">
+                        ${data.shlok || ''}
+                    </div>
+                    <div class="history-meaning" style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; font-family:var(--font-sub);">
+                        Meaning: ${data.meaning || ''}
+                    </div>
+                </div>
+            `;
+            historyList.insertAdjacentHTML('afterbegin', newItemHtml);
+            
+            // Clear textarea
+            thoughtField.value = '';
+            wordBadge.innerText = '0 words | 0 characters';
+            
+            // Update sidebar stats
+            const streakStrong = document.querySelector('.stat-icon-streak + span strong');
+            const pointsStrong = document.querySelector('.stat-icon-points + span strong');
+            if (streakStrong && data.streak) streakStrong.innerText = data.streak + ' Days';
+            if (pointsStrong && data.total_points) pointsStrong.innerText = data.total_points + ' MP';
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Reflect & Reframe</span> <i class="fa-solid fa-paper-plane"></i>';
+            console.error(err);
+            alert("An error occurred during submission.");
+        });
+    });
+</script>
+{% endblock %}

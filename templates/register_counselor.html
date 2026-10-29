@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counselor Registration — Sarathi Mental Wellness</title>
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .counselor-reg-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            max-width: 740px;
+            width: 100%;
+            padding: 3rem;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .reg-header {
+            text-align: center;
+            margin-bottom: 2.2rem;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-sage-light);
+            border: 1px solid var(--card-border);
+            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        .reg-title {
+            font-family: var(--font-serif);
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .reg-sub {
+            font-size: 0.98rem;
+            color: var(--text-secondary);
+            font-family: var(--font-sub);
+            max-width: 540px;
+            margin: 0 auto;
+            line-height: 1.55;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1.1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.82rem 1.1rem 0.82rem 2.85rem;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(40, 75, 63, 0.15);
+        }
+
+        textarea.form-control {
+            padding: 0.85rem 1.1rem;
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .btn-register {
+            width: 100%;
+            background: var(--accent-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 0.95rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: var(--font-main);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            box-shadow: 0 6px 20px rgba(40, 75, 63, 0.22);
+            margin-top: 1rem;
+        }
+
+        .btn-register:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(40, 75, 63, 0.28);
+        }
+
+        .auth-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-footer a {
+            color: var(--accent-primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid-2 { grid-template-columns: 1fr; }
+            .counselor-reg-card { padding: 2rem 1.5rem; }
+            .reg-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Universal Theme Selector -->
+    <div style="position:fixed; top:1.5rem; right:1.5rem; z-index:100;">
+        <div class="theme-selector-wrapper">
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemeDropdown(event)" title="Choose Theme Palette">
+                <i class="fa-solid fa-sun" id="themeToggleIcon"></i>
+                <span id="themeToggleText">Daylight Mode</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; opacity:0.6; margin-left:3px;"></i>
+            </button>
+            <div class="theme-dropdown-menu" id="themeDropdownMenu">
+                <button type="button" class="theme-option-item active" data-theme-val="daylight" onclick="setSarathiTheme('daylight')">
+                    <span class="theme-color-dot" style="background:#284b3f;"></span>
+                    <span>Daylight (Sage)</span>
+                </button>
+                <button type="button" class="theme-option-item" data-theme-val="amber" onclick="setSarathiTheme('amber')">
+                    <span class="theme-color-dot" style="background:#b45309;"></span>
+                    <span>Warm Amber</span>
+                </button>
+                <button type="button" class="theme-option-item" data-theme-val="night" onclick="setSarathiTheme('night')">
+                    <span class="theme-color-dot" style="background:#8c52ff;"></span>
+                    <span>Midnight Cosmic</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="counselor-reg-card">
+        <div class="reg-header">
+            <div class="badge-pill">
+                <i class="fa-solid fa-user-doctor"></i> Clinical & Counseling Network
+            </div>
+            <h1 class="reg-title">Join Sarathi as a Counselor</h1>
+            <p class="reg-sub">Empower students and individuals with compassionate mental health guidance, Vedic cognitive reframing, and secure clinical scheduling.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-box {% if category == 'success' %}flash-box-success{% endif %}" style="padding:0.85rem 1.25rem; border-radius:14px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.65rem; background:rgba(225,29,72,0.12); border:1px solid #e11d48; color:#be123c; font-weight:600;">
+                        <i class="fa-solid {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('register_counselor') }}" method="POST">
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="username">Professional Username *</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="e.g., dr.sharma" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Professional Email Address *</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="dr.sharma@clinic.org" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="password">Account Password *</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="Enter secure password" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialization">Primary Clinical Specialization *</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-brain"></i>
+                        <select name="specialization" id="specialization" class="form-control" style="padding-left: 2.85rem;">
+                            <option value="General Wellness">General Mental Wellness</option>
+                            <option value="Anxiety/Stress">Anxiety & Stress Management</option>
+                            <option value="Academic Support">Academic & Exam Anxiety</option>
+                            <option value="Relationship Therapy">Relationship & Grief Therapy</option>
+                            <option value="Depression & Mood">Depression & Mood Recovery</option>
+                            <option value="Mindfulness & CBT">Mindfulness & Cognitive Restructuring</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="qualifications">Degrees & Clinical Licenses *</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-certificate"></i>
+                        <input type="text" name="qualifications" id="qualifications" class="form-control" placeholder="e.g., M.Phil Clinical Psych / RCI License" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience_years">Years of Experience</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <input type="number" name="experience_years" id="experience_years" class="form-control" placeholder="e.g., 5" min="0" max="60" value="3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="bio">Professional Statement & Therapeutic Approach</label>
+                <textarea name="bio" id="bio" class="form-control" placeholder="Briefly describe your counseling philosophy, background with students/young adults, and areas of expertise..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-register">
+                <span>Complete Counselor Registration</span>
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already registered as a Counselor? <a href="{{ url_for('login_counselor') }}">Sign In to Counselor Console</a>
+            <div style="margin-top:0.6rem;">
+                <a href="{{ url_for('login') }}" style="color:var(--text-secondary); font-size:0.85rem;"><i class="fa-solid fa-arrow-left"></i> Return to Main Portals</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

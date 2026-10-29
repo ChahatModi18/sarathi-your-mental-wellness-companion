@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found (404) — Sarathi{% endblock %}
+
+{% block content %}
+<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem;">
+    <div style="max-width: 600px; width: 100%; text-align: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 28px; padding: 3rem 2.2rem; box-shadow: var(--box-shadow-card);">
+        <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; border-radius: 50%; background: var(--accent-sage-light); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 2.2rem;">
+            <i class="fa-solid fa-compass"></i>
+        </div>
+        
+        <span style="display: inline-block; padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; background: rgba(40, 75, 63, 0.1); color: var(--accent-primary); margin-bottom: 1rem; letter-spacing: 0.5px;">
+            ERROR 404 • MINDFUL PAUSE
+        </span>
+
+        <h1 style="font-family: var(--font-serif); font-size: 2.3rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.8rem; line-height: 1.25;">
+            The path has gently drifted away.
+        </h1>
+
+        <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.8rem;">
+            The page you are searching for does not exist or may have been relocated. Take a mindful breath and return to your sanctuary.
+        </p>
+
+        <div style="background: var(--input-bg); border-left: 4px solid var(--accent-primary); border-radius: 12px; padding: 1.1rem 1.4rem; margin-bottom: 2.2rem; text-align: left;">
+            <p style="font-family: var(--font-serif); font-style: italic; color: var(--text-primary); font-size: 1.05rem; margin-bottom: 0.35rem;">
+                "You have a right to perform your prescribed duties, but are not entitled to the fruits of your actions."
+            </p>
+            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">— Bhagavad Gita, Chapter 2, Verse 47</span>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="padding: 0.75rem 1.6rem; font-size: 0.95rem; border-radius: 14px;">
+                <i class="fa-solid fa-house"></i> Return to Dashboard
+            </a>
+            <a href="{{ url_for('period') }}" class="btn btn-secondary" style="padding: 0.75rem 1.6rem; font-size: 0.95rem; border-radius: 14px;">
+                <i class="fa-solid fa-venus"></i> Period & Wellness Journal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

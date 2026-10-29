@@ -1,0 +1,1162 @@
+{% extends "base.html" %}
+
+{% block title %}Psychoeducational Hub & Cognitive Reframing — Sarathi BhagvadMood{% endblock %}
+
+{% block style %}
+<style>
+    .hub-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .hub-header {
+        background: radial-gradient(circle at 50% 20%, rgba(140, 82, 255, 0.15) 0%, rgba(13, 10, 31, 0.6) 80%);
+        border: 1px solid rgba(140, 82, 255, 0.25);
+        border-radius: 24px;
+        padding: 2.2rem 1.8rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    /* Tab Navigation Pill Bar */
+    .tab-nav {
+        display: flex;
+        gap: 0.6rem;
+        overflow-x: auto;
+        padding-bottom: 0.6rem;
+        scrollbar-width: thin;
+    }
+
+    .tab-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+        font-family: var(--font-main);
+        font-weight: 600;
+        font-size: 0.92rem;
+        padding: 0.7rem 1.3rem;
+        border-radius: 30px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+        background: rgba(140, 82, 255, 0.15);
+        color: white;
+        border-color: rgba(140, 82, 255, 0.3);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--accent-primary) 0%, #a275ff 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 0 15px rgba(140, 82, 255, 0.4);
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeInUp 0.4s ease forwards;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* AI Recommendation View */
+    .metric-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 1.3rem;
+        border-radius: 18px;
+        text-align: center;
+    }
+
+    .metric-val {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: white;
+        margin-top: 0.3rem;
+        font-family: var(--font-main);
+    }
+
+    .ai-rec-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .ai-rec-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .rec-box {
+        padding: 2.2rem;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(140, 82, 255, 0.12) 0%, rgba(23, 18, 56, 0.85) 100%);
+        border: 1px solid rgba(140, 82, 255, 0.3);
+        box-shadow: var(--shadow-glow);
+        display: flex;
+        flex-direction: column;
+        gap: 1.3rem;
+    }
+
+    .prob-bar-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .prob-bar-bg {
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .prob-bar-fill {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--accent-primary) 0%, #b388ff 100%);
+        box-shadow: 0 0 10px rgba(140, 82, 255, 0.6);
+        transition: width 1s ease-out;
+    }
+
+    /* Gita Verse Explorer */
+    .gita-search-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .gita-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .gita-card {
+        background: rgba(23, 18, 56, 0.7);
+        border: 1px solid rgba(140, 82, 255, 0.25);
+        border-radius: 20px;
+        padding: 1.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .gita-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(140, 82, 255, 0.5);
+        box-shadow: 0 10px 25px rgba(140, 82, 255, 0.2);
+    }
+
+    .verse-sanskrit {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #f7d794;
+        line-height: 1.6;
+    }
+
+    /* 5-4-3-2-1 Sensory Grounding */
+    .grounding-box {
+        background: linear-gradient(135deg, rgba(16, 24, 52, 0.85) 0%, rgba(28, 16, 56, 0.85) 100%);
+        border: 1px solid rgba(0, 230, 118, 0.25);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .grounding-step {
+        display: flex;
+        gap: 1.2rem;
+        align-items: flex-start;
+        padding: 1.2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .grounding-step.completed {
+        border-color: rgba(0, 230, 118, 0.4);
+        background: rgba(0, 230, 118, 0.04);
+    }
+
+    .step-number-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-primary) 0%, #b388ff 100%);
+        color: white;
+        font-family: var(--font-main);
+        font-weight: 800;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Resource Directory Items */
+    .resource-list-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.2rem;
+    }
+
+    .resource-link-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .resource-link-card:hover {
+        background: rgba(140, 82, 255, 0.12);
+        border-color: rgba(140, 82, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Community Submissions */
+    .community-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        padding: 1.4rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hub-container">
+    <!-- Header -->
+    <div class="hub-header">
+        <div>
+            <span class="badge" style="background: rgba(140, 82, 255, 0.15); color: #d1b8ff; border: 1px solid rgba(140, 82, 255, 0.3); margin-bottom: 0.6rem; display: inline-block;">
+                <i class="fa-solid fa-brain"></i> Multi-Tier Psychoeducational Ecosystem
+            </span>
+            <h1 style="font-size: 2.2rem; color: white; margin-bottom: 0.4rem;">
+                Resource Hub & Cognitive Reframing Studio
+            </h1>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 1.05rem;">
+                Explore neural AI support recommendations, timeless Vedic psychological wisdom, and interactive somatic calming tools.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.8rem; align-items: center;">
+            <button class="btn" onclick="openBreathingModal()">
+                <i class="fa-solid fa-lungs"></i> 4-4-4-4 Breathing
+            </button>
+            <a href="{{ url_for('booking') }}" class="btn" style="background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);">
+                <i class="fa-solid fa-calendar-check"></i> Book Counselor
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs (Exact Parity with Desktop Notebook Tabs) -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchHubTab('ai-rec', this)">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Recommendations
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('gita-explorer', this)">
+            <i class="fa-solid fa-book-quran"></i> Bhagavad Gita Explorer
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('somatic-grounding', this)">
+            <i class="fa-solid fa-spa"></i> 5-4-3-2-1 Sensory Grounding
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('info-guides', this)">
+            <i class="fa-solid fa-book-open"></i> Self-Care Guides & Books
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('multimedia', this)">
+            <i class="fa-solid fa-circle-play"></i> Videos & Soundscapes
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('regional', this)">
+            <i class="fa-solid fa-earth-asia"></i> Regional & Helplines
+        </button>
+        <button class="tab-btn" onclick="switchHubTab('community', this)">
+            <i class="fa-solid fa-users"></i> Community Forum Resources
+        </button>
+    </div>
+
+    <!-- TAB 1: AI Recommendations (PyTorch / Sequential Model) -->
+    <div id="tab-ai-rec" class="tab-pane active">
+        <!-- Input Parameters fed to Neural Network -->
+        <div class="metric-cards">
+            <div class="metric-card">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fa-solid fa-square-poll-horizontal"></i> PHQ-9 (Depression Risk)</span>
+                <div class="metric-val">{{ phq }} / 27</div>
+                <span style="font-size: 0.8rem; color: {% if phq >= 15 %}#ff5252{% elif phq >= 10 %}#ffb142{% else %}#00e676{% endif %};">
+                    {% if phq >= 15 %}Moderately Severe{% elif phq >= 10 %}Moderate{% elif phq >= 5 %}Mild{% else %}Minimal{% endif %}
+                </span>
+            </div>
+            <div class="metric-card">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fa-solid fa-square-poll-vertical"></i> GAD-7 (Anxiety Risk)</span>
+                <div class="metric-val">{{ gad }} / 21</div>
+                <span style="font-size: 0.8rem; color: {% if gad >= 15 %}#ff5252{% elif gad >= 10 %}#ffb142{% else %}#00e676{% endif %};">
+                    {% if gad >= 15 %}Severe Anxiety{% elif gad >= 10 %}Moderate{% elif gad >= 5 %}Mild{% else %}Minimal{% endif %}
+                </span>
+            </div>
+            <div class="metric-card">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fa-solid fa-heart-pulse"></i> Journal Sentiment Polarity</span>
+                <div class="metric-val">{{ "%.2f"|format(pol) }}</div>
+                <span style="font-size: 0.8rem; color: {% if pol < -0.1 %}#ff5252{% elif pol > 0.1 %}#00e676{% else %}#b388ff{% endif %};">
+                    {% if pol < -0.1 %}Predominantly Low{% elif pol > 0.1 %}Uplifted / Positive{% else %}Balanced Baseline{% endif %}
+                </span>
+            </div>
+            <div class="metric-card">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fa-solid fa-clock-rotate-left"></i> Screening History</span>
+                <div class="metric-val"><i class="fa-solid fa-circle-check" style="color: #00e676; font-size: 1.5rem;"></i></div>
+                <a href="{{ url_for('screenings') }}" style="font-size: 0.82rem; color: var(--accent-secondary); text-decoration: none;">
+                    Take New Screening &rarr;
+                </a>
+            </div>
+        </div>
+
+        <div class="ai-rec-grid">
+            <!-- Recommendation Output -->
+            <div class="rec-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: var(--accent-primary); color: white; font-weight: 700; text-transform: uppercase;">
+                        Tier {{ rec.type }} Support
+                    </span>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">PyTorch Multi-Class Classification</span>
+                </div>
+                
+                <h2 style="font-size: 1.85rem; color: white; margin: 0;">{{ rec.title }}</h2>
+                <p style="font-size: 1.05rem; line-height: 1.6; color: var(--text-secondary); margin: 0;">{{ rec.desc }}</p>
+                
+                <div style="margin-top: auto; padding-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    {% if rec.type == 'Guides' %}
+                        <button onclick="switchHubTab('info-guides')" class="btn">
+                            <i class="fa-solid fa-book-open"></i> Read Self-Care Coping Guides
+                        </button>
+                    {% elif rec.type == 'Videos' %}
+                        <button onclick="switchHubTab('multimedia')" class="btn">
+                            <i class="fa-solid fa-circle-play"></i> Watch Stress Relief Videos
+                        </button>
+                    {% elif rec.type == 'Audio' %}
+                        <button onclick="switchHubTab('multimedia')" class="btn">
+                            <i class="fa-solid fa-headphones"></i> Listen to Relaxing Soundscapes
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('booking') }}" class="btn">
+                            <i class="fa-solid fa-calendar-days"></i> Book Counseling Session
+                        </a>
+                    {% endif %}
+                    
+                    <button class="btn" style="background: rgba(255, 255, 255, 0.08);" onclick="openBreathingModal()">
+                        <i class="fa-solid fa-wind"></i> 4-4-4-4 Square Breathing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Neural Network Probabilities Chart -->
+            <div class="card">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.8rem;">
+                    <i class="fa-solid fa-microchip" style="color: var(--accent-secondary); margin-right: 0.4rem;"></i>
+                    Neural Probability Output
+                </h3>
+                
+                <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                    <div class="prob-bar-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                            <span>Class 0: Self-Care & Info Guides</span>
+                            <strong style="color: white;">{{ "%.1f"|format(probs[0]*100) }}%</strong>
+                        </div>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar-fill" style="width: {{ probs[0]*100 }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="prob-bar-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                            <span>Class 1: Stress Management Videos</span>
+                            <strong style="color: white;">{{ "%.1f"|format(probs[1]*100) }}%</strong>
+                        </div>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar-fill" style="width: {{ probs[1]*100 }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="prob-bar-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                            <span>Class 2: Relaxation & Mindfulness Audios</span>
+                            <strong style="color: white;">{{ "%.1f"|format(probs[2]*100) }}%</strong>
+                        </div>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar-fill" style="width: {{ probs[2]*100 }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="prob-bar-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                            <span>Class 3: Professional Counseling</span>
+                            <strong style="color: white;">{{ "%.1f"|format(probs[3]*100) }}%</strong>
+                        </div>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar-fill" style="width: {{ probs[3]*100 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+                    <i class="fa-solid fa-circle-info"></i> Output computed with He-initialized multi-layer perceptron over 5 biological & psychometric features: Age, Gender, PHQ-9, GAD-7, and Sentiment Polarity.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: Bhagavad Gita Wisdom & Cognitive Reframing Explorer -->
+    <div id="tab-gita-explorer" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.2rem;">
+                <div>
+                    <h2 style="font-size: 1.6rem; color: white; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-dharmachakra" style="color: #ffd700; margin-right: 0.5rem;"></i>
+                        Bhagavad Gita Cognitive Reframing Explorer
+                    </h2>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">
+                        Search and filter ancient psychological principles paired with evidence-based cognitive therapy reframings.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="filter-chip active" onclick="filterGitaCategory('all', this)">All Themes</button>
+                    <button class="filter-chip" onclick="filterGitaCategory('anxiety', this)">Anxiety & Duty</button>
+                    <button class="filter-chip" onclick="filterGitaCategory('burnout', this)">Burnout</button>
+                    <button class="filter-chip" onclick="filterGitaCategory('anger', this)">Anger</button>
+                    <button class="filter-chip" onclick="filterGitaCategory('despair', this)">Despair</button>
+                    <button class="filter-chip" onclick="filterGitaCategory('peace', this)">Inner Peace</button>
+                </div>
+            </div>
+
+            <div class="gita-search-bar">
+                <div style="position: relative; flex: 1;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                    <input type="text" id="gitaSearchInput" placeholder="Search by emotion, Sanskrit term, or life situation..." oninput="handleGitaSearch()" style="width: 100%; padding-left: 2.8rem;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Gita Cards Grid (Dynamically Populated from /api/gita/verses) -->
+        <div class="gita-cards-grid" id="gitaGrid">
+            <!-- Pre-rendered baseline cards for instant SEO/offline readiness -->
+            <div class="gita-card" data-theme="anxiety">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(255, 179, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 179, 0, 0.3);">
+                        Chapter 2, Verse 47
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। You have a right to your work, but never to its fruits.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"You have a right to perform your prescribed duty, but never to the fruits of action. Never let outcomes be your motive, nor be attached to inaction."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        Focus solely on what you can control right now. Anxiety blooms when you attach your identity to external outcomes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="gita-card" data-theme="despair">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3);">
+                        Chapter 6, Verse 5
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('उद्धरेदात्मनात्मानम्। Elevate yourself by your own mind; do not degrade yourself.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">उद्धरेदात्मनाऽऽत्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"Elevate yourself by your own mind; do not degrade yourself. For the mind alone is the friend of the self, and the mind alone is the enemy."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        Practice unconditional self-compassion. Speak to yourself with the tenderness you would offer a loved one in pain.
+                    </p>
+                </div>
+            </div>
+
+            <div class="gita-card" data-theme="burnout">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(33, 150, 243, 0.15); color: #2196f3; border: 1px solid rgba(33, 150, 243, 0.3);">
+                        Chapter 6, Verse 17
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('युक्ताहारविहारस्य। Balance in recreation, sleep, and work destroys all sorrow.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु। युक्तस्वप्नावबोधस्य योगो भवति दुःखहा॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"He who is regulated in eating, recreation, work, sleep, and wakefulness attains yoga that destroys all sorrow."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        Rest is not a reward for work; it is an essential pillar of life. Give yourself guilt-free permission to recharge.
+                    </p>
+                </div>
+            </div>
+
+            <div class="gita-card" data-theme="anger">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(255, 82, 82, 0.15); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.3);">
+                        Chapter 2, Verse 63
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('क्रोधाद्भवति सम्मोहः। From anger arises delusion and loss of memory.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः। स्मृतिभ्रंशाद् बुद्धिनाशो बुद्धिनाशात्प्रणश्यति॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"From anger arises delusion; from delusion comes confusion of memory; from confusion of memory comes loss of intellect; and from loss of intellect, destruction ensues."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        When reactive anger surges, create a 60-second pause. Do not make permanent decisions on temporary emotional tides.
+                    </p>
+                </div>
+            </div>
+
+            <div class="gita-card" data-theme="peace">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(156, 39, 176, 0.15); color: #ba68c8; border: 1px solid rgba(156, 39, 176, 0.3);">
+                        Chapter 3, Verse 17
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('यस्त्वात्मरतिरेव स्यात्। One who rejoices within the self is truly peaceful.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">यस्त्वात्मरतिरेव स्यादात्मतृप्तश्च मानवः। आत्मन्येव च सन्तुष्टस्तस्य कार्यं न विद्यते॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"One who rejoices solely in the self, is satisfied with the self, and is content within, for him there are no anxious obligations."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        Inner tranquility cannot be bought or granted by other people's approval. It is found by turning attention inward.
+                    </p>
+                </div>
+            </div>
+
+            <div class="gita-card" data-theme="anxiety">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(255, 179, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 179, 0, 0.3);">
+                        Chapter 2, Verse 20
+                    </span>
+                    <button class="audio-btn" onclick="speakWisdom('न जायते म्रियते वा कदाचित्। The soul is eternal and transcends storms.', this)">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+                <div class="verse-sanskrit">न जायते म्रियते वा कदाचित् नायं भूत्वा भविता वा न भूयः। अजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे॥</div>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    <em>"The soul is neither born nor does it ever die. Unborn, eternal, ever-existing, and primeval, it is not slain when the body is slain."</em>
+                </p>
+                <div style="background: rgba(140, 82, 255, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.8rem; border-radius: 0 10px 10px 0;">
+                    <strong style="color: var(--accent-secondary); font-size: 0.85rem; text-transform: uppercase;">Cognitive Reframing:</strong>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.3rem 0 0 0;">
+                        Remind yourself that thoughts and feelings are temporary weather patterns, while your conscious self is the vast, indestructible sky.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: 5-4-3-2-1 Sensory Grounding Studio -->
+    <div id="tab-somatic-grounding" class="tab-pane">
+        <div class="grounding-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <span class="badge" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); margin-bottom: 0.5rem; display: inline-block;">
+                        <i class="fa-solid fa-shield-heart"></i> Somatic Nervous System Regulation
+                    </span>
+                    <h2 style="font-size: 2rem; color: white; margin: 0 0 0.4rem 0;">
+                        5-4-3-2-1 Sensory Grounding Technique
+                    </h2>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 1.05rem;">
+                        This validated grounding technique redirects attention from catastrophic cognitive loops into real-time sensory inputs.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.8rem;">
+                    <button class="btn" onclick="openBreathingModal()">
+                        <i class="fa-solid fa-wind"></i> Square Breathing
+                    </button>
+                    <button class="btn" id="finishGroundingBtn" onclick="completeGroundingSession()" style="background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);">
+                        <i class="fa-solid fa-award"></i> Claim Grounding Reward (+15 MP)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="grounding-step" id="gStep1">
+                <div class="step-number-badge">5</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; font-size: 1.25rem; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-eye" style="color: #64b5f6; margin-right: 0.4rem;"></i>
+                        Look Around: Acknowledge 5 Things You See
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 0.8rem 0;">
+                        A spot on the wall, light reflecting off a surface, a pen, a plant, a shadow. Notice their colors and textures.
+                    </p>
+                    <input type="text" placeholder="Type or mentally note 5 things you see..." style="width: 100%;" oninput="markStepDone('gStep1')">
+                </div>
+            </div>
+
+            <div class="grounding-step" id="gStep2">
+                <div class="step-number-badge">4</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; font-size: 1.25rem; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-hand" style="color: #81c784; margin-right: 0.4rem;"></i>
+                        Physical Contact: Acknowledge 4 Things You Can Touch
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 0.8rem 0;">
+                        The texture of your clothing, the smooth desk under your fingers, the pressure of your feet against the floor.
+                    </p>
+                    <input type="text" placeholder="Type or mentally note 4 sensations you can touch..." style="width: 100%;" oninput="markStepDone('gStep2')">
+                </div>
+            </div>
+
+            <div class="grounding-step" id="gStep3">
+                <div class="step-number-badge">3</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; font-size: 1.25rem; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-ear-listen" style="color: #ba68c8; margin-right: 0.4rem;"></i>
+                        Listen Closely: Acknowledge 3 Things You Can Hear
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 0.8rem 0;">
+                        Traffic in the distance, a gentle fan, bird calls outside, or your own slow breath.
+                    </p>
+                    <input type="text" placeholder="Type or mentally note 3 ambient sounds..." style="width: 100%;" oninput="markStepDone('gStep3')">
+                </div>
+            </div>
+
+            <div class="grounding-step" id="gStep4">
+                <div class="step-number-badge">2</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; font-size: 1.25rem; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-wind" style="color: #ffd54f; margin-right: 0.4rem;"></i>
+                        Scent Awareness: Acknowledge 2 Things You Can Smell
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 0.8rem 0;">
+                        Coffee, rain in the breeze, fresh paper, soap, or simply the neutral air in your room.
+                    </p>
+                    <input type="text" placeholder="Type or mentally note 2 scents..." style="width: 100%;" oninput="markStepDone('gStep4')">
+                </div>
+            </div>
+
+            <div class="grounding-step" id="gStep5">
+                <div class="step-number-badge">1</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; font-size: 1.25rem; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-mug-hot" style="color: #ff8a65; margin-right: 0.4rem;"></i>
+                        Taste: Acknowledge 1 Thing You Can Taste
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 0.8rem 0;">
+                        Take a sip of cool water, notice a mint, or simply focus on the resting state of your tongue.
+                    </p>
+                    <input type="text" placeholder="Type or mentally note 1 taste sensation..." style="width: 100%;" oninput="markStepDone('gStep5')">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: Self-Care Info Guides & Recommended Books -->
+    <div id="tab-info-guides" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 1rem;">
+                <i class="fa-solid fa-lightbulb" style="color: #ffd700; margin-right: 0.5rem;"></i>
+                Evidence-Based Self-Care Strategies
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem;">
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.3rem;">
+                    <h4 style="color: var(--accent-secondary); margin-bottom: 0.4rem;"><i class="fa-solid fa-stopwatch"></i> The Pomodoro Technique</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0; line-height: 1.5;">
+                        Break intimidating tasks into 25-minute focused sprints followed by 5 minutes of total disengagement. Prevents mental fatigue.
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.3rem;">
+                    <h4 style="color: #00e676; margin-bottom: 0.4rem;"><i class="fa-solid fa-sun"></i> Morning Sunlight Reset</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0; line-height: 1.5;">
+                        View natural morning sunlight for 10-15 minutes to trigger natural cortisol peaks and set your circadian sleep cycle.
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.3rem;">
+                    <h4 style="color: #ffb142; margin-bottom: 0.4rem;"><i class="fa-solid fa-hand-holding-heart"></i> Digital Sunset Hour</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0; line-height: 1.5;">
+                        Turn off social media and notification streams 60 minutes before bed to allow melatonin synthesis and calm overactive neural pathways.
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.3rem;">
+                    <h4 style="color: #ff5252; margin-bottom: 0.4rem;"><i class="fa-solid fa-shield-virus"></i> Assertive Boundaries</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0; line-height: 1.5;">
+                        Saying "no" to unreasonable demands is a fundamental act of emotional hygiene. Protect your emotional reserves without guilt.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 1rem;">
+                <i class="fa-solid fa-book" style="color: var(--accent-secondary); margin-right: 0.5rem;"></i>
+                Recommended Psychological & Philosophical Literature
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem;">
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.2rem;">
+                    <h4 style="color: white; margin: 0 0 0.3rem 0;">The Happiness Trap</h4>
+                    <span style="font-size: 0.85rem; color: var(--accent-secondary);">Dr. Russ Harris</span>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.4rem; line-height: 1.4;">
+                        How to stop struggling and start living through Acceptance and Commitment Therapy (ACT).
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.2rem;">
+                    <h4 style="color: white; margin: 0 0 0.3rem 0;">Atomic Habits</h4>
+                    <span style="font-size: 0.85rem; color: var(--accent-secondary);">James Clear</span>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.4rem; line-height: 1.4;">
+                        Tiny changes, remarkable results. Build systems that make sustainable mental wellness automatic.
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.2rem;">
+                    <h4 style="color: white; margin: 0 0 0.3rem 0;">Man's Search for Meaning</h4>
+                    <span style="font-size: 0.85rem; color: var(--accent-secondary);">Viktor E. Frankl</span>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.4rem; line-height: 1.4;">
+                        Logotherapy foundation: finding profound human purpose even in times of deep adversity.
+                    </p>
+                </div>
+                <div class="card" style="background: rgba(255,255,255,0.02); padding: 1.2rem;">
+                    <h4 style="color: white; margin: 0 0 0.3rem 0;">The Power of Now</h4>
+                    <span style="font-size: 0.85rem; color: var(--accent-secondary);">Eckhart Tolle</span>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.4rem; line-height: 1.4;">
+                        A guide to spiritual enlightenment and freedom from obsessive past rumination and future worry.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 5: Curated Videos & Soundscapes -->
+    <div id="tab-multimedia" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 1.2rem;">
+                <i class="fa-solid fa-headphones" style="color: #64b5f6; margin-right: 0.5rem;"></i>
+                Relaxation Soundscapes & Guided Audio
+            </h2>
+            <div class="resource-list-grid">
+                <a href="https://www.youtube.com/results?search_query=5+minute+guided+meditation+audio" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">5-Minute Guided Meditation</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Quick centering for high-stress breaks</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=forest+rain+soundscape+relaxing+audio" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Forest Rain Soundscape</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Deep natural acoustics for concentration</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=ocean+waves+sleep+audio" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Ocean Waves for Sleep</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Delta wave sleep induction sounds</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=deep+sleep+relaxing+music" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Deep Sleep Music (432Hz)</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Harmonic relaxation frequency</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 1.2rem;">
+                <i class="fa-solid fa-video" style="color: #ff5252; margin-right: 0.5rem;"></i>
+                Expert Psychoeducational Videos
+            </h2>
+            <div class="resource-list-grid">
+                <a href="https://www.youtube.com/results?search_query=managing+exam+stress+tips+video" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Managing Exam Stress</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Practical neuroscience study advice</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=recognizing+burnout+talk+video" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Recognizing Burnout Signs</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Clinical symptoms and recovery pathways</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=10+minute+guided+mindfulness+meditation" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">10-Minute Guided Mindfulness</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Somatic awareness & tension release</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=sleep+hygiene+tips+video" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Sleep Hygiene Masterclass</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Evidence-based sleep optimization</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 6: Regional Language Resources & Verified Helplines -->
+    <div id="tab-regional" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem; border-color: rgba(255, 82, 82, 0.4); background: rgba(255, 82, 82, 0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h2 style="font-size: 1.6rem; color: #ff8a80; margin: 0;">
+                    <i class="fa-solid fa-phone-volume" style="margin-right: 0.5rem;"></i>
+                    Immediate Crisis Helplines (24/7 Free & Confidential)
+                </h2>
+                <span class="badge" style="background: rgba(255, 82, 82, 0.2); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.4);">
+                    Emergency Protocols
+                </span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem;">
+                <div class="card" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08);">
+                    <h3 style="color: white; margin-bottom: 0.3rem;">Tele-MANAS</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Govt. of India 24/7 Comprehensive Mental Health Service</p>
+                    <a href="tel:14416" class="btn" style="background: #00e676; color: #111; font-weight: 800;">
+                        <i class="fa-solid fa-phone"></i> Call 14416 / 1800-891-4416
+                    </a>
+                </div>
+                <div class="card" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08);">
+                    <h3 style="color: white; margin-bottom: 0.3rem;">Vandrevala Foundation</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">24/7 Professional Counseling & Suicide Prevention</p>
+                    <a href="tel:+919999666555" class="btn" style="background: #29b6f6; color: #111; font-weight: 800;">
+                        <i class="fa-solid fa-phone"></i> Call +91 9999 666 555
+                    </a>
+                </div>
+                <div class="card" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08);">
+                    <h3 style="color: white; margin-bottom: 0.3rem;">KIRAN Helpline</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Ministry of Social Justice 24/7 Toll-Free Support</p>
+                    <a href="tel:18005990019" class="btn" style="background: #ab47bc; color: white; font-weight: 800;">
+                        <i class="fa-solid fa-phone"></i> Call 1800-599-0019
+                    </a>
+                </div>
+                <div class="card" style="background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.08);">
+                    <h3 style="color: white; margin-bottom: 0.3rem;">National Emergency</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">All-in-one Emergency Services (Police, Ambulance, Fire)</p>
+                    <a href="tel:112" class="btn" style="background: #ff5252; color: white; font-weight: 800;">
+                        <i class="fa-solid fa-phone"></i> Dial 112
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 1.2rem;">
+                <i class="fa-solid fa-language" style="color: #ffd700; margin-right: 0.5rem;"></i>
+                Regional Language Wellness & Meditations
+            </h2>
+            <div class="resource-list-grid">
+                <a href="https://www.youtube.com/results?search_query=mindfulness+meditation+hindi" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Hindi Guided Meditation</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">हिंदी में ध्यान और विश्राम</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=meditation+tamil" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Tamil Guided Relaxation</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">தமிழ் தியானம் மற்றும் வழிகாட்டுதல்</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=meditation+bengali" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Bengali Mindfulness</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">বাংলায় মননশীলতা এবং মেডিটেশন</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=meditation+marathi" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Marathi Relaxation</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">मराठी ध्यान आणि मानसिक स्वास्थ्य</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+                <a href="https://www.youtube.com/results?search_query=meditation+punjabi" target="_blank" class="resource-link-card">
+                    <div>
+                        <h4 style="margin: 0 0 0.3rem 0; color: white;">Punjabi Guided Audio</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">ਪੰਜਾਬੀ ਵਿੱਚ ਧਿਆਨ ਅਤੇ ਸ਼ਾਂਤੀ</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--accent-secondary);"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 7: Community Resource Submissions -->
+    <div id="tab-community" class="tab-pane">
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="font-size: 1.6rem; color: white; margin: 0 0 0.3rem 0;">
+                        <i class="fa-solid fa-hand-holding-hand" style="color: var(--accent-secondary); margin-right: 0.5rem;"></i>
+                        Community Wisdom & Resource Suggestions
+                    </h2>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">
+                        Shared coping mechanisms and tools contributed by peers across the BhagvadMood platform.
+                    </p>
+                </div>
+                <button class="btn" onclick="openResourceModal()">
+                    <i class="fa-solid fa-plus"></i> Share a Resource
+                </button>
+            </div>
+
+            <!-- List of Community Resources -->
+            <div id="communityResourcesList">
+                {% if community_resources and community_resources|length > 0 %}
+                    {% for res in community_resources %}
+                    <div class="community-card">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+                            <span class="badge" style="background: rgba(140, 82, 255, 0.15); color: #c4a1ff;">
+                                {{ res.type }}
+                            </span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">by {{ res.user }} • {{ res.time }}</span>
+                        </div>
+                        <h3 style="color: white; font-size: 1.2rem; margin: 0 0 0.4rem 0;">{{ res.title }}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin: 0;">{{ res.desc }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                        <i class="fa-solid fa-comments" style="font-size: 2.5rem; opacity: 0.3; margin-bottom: 0.8rem;"></i>
+                        <p style="margin: 0; font-size: 1.05rem;">No community resources shared yet. Be the first to share an inspiring resource with others!</p>
+                        <button class="btn" onclick="openResourceModal()" style="margin-top: 1rem;">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Your Resource
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Submit Resource -->
+<div class="modal-overlay" id="resourceModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+            <h3 style="color: white; margin: 0; font-size: 1.3rem;">
+                <i class="fa-solid fa-plus-circle" style="color: var(--accent-secondary); margin-right: 0.4rem;"></i>
+                Submit a Coping Resource
+            </h3>
+            <button onclick="closeResourceModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="resourceSubmitForm" onsubmit="handleResourceSubmit(event)">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.4rem;">Resource Type</label>
+                <select id="modalResType" style="width: 100%;">
+                    <option value="Coping Technique">Coping Technique / Exercise</option>
+                    <option value="Book / Article">Book / Article</option>
+                    <option value="Video / Talk">Video / Inspirational Talk</option>
+                    <option value="Podcast / Audio">Podcast / Audio Guide</option>
+                    <option value="Community Suggestion" selected>General Advice</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.4rem;">Title</label>
+                <input type="text" id="modalResTitle" required placeholder="e.g. 5-Minute Box Breathing for Exams" style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.4rem;">Description / Link / Notes</label>
+                <textarea id="modalResDesc" rows="4" required placeholder="Describe why this tool helped you and how peers can practice it..." style="width: 100%;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.8rem;">
+                <button type="button" class="btn" style="background: rgba(255,255,255,0.08);" onclick="closeResourceModal()">Cancel</button>
+                <button type="submit" class="btn">
+                    <i class="fa-solid fa-paper-plane"></i> Submit to Community
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Tab switching controller
+    function switchHubTab(tabName, btnElement) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        const targetPane = document.getElementById(`tab-${tabName}`);
+        if (targetPane) targetPane.classList.add('active');
+        
+        if (btnElement) {
+            btnElement.classList.add('active');
+        } else {
+            const correspondingBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
+            if (correspondingBtn) correspondingBtn.classList.add('active');
+        }
+    }
+
+    // Modal controls for resource submission
+    function openResourceModal() {
+        document.getElementById('resourceModal').classList.add('active');
+    }
+
+    function closeResourceModal() {
+        document.getElementById('resourceModal').classList.remove('active');
+    }
+
+    function handleResourceSubmit(e) {
+        e.preventDefault();
+        const title = document.getElementById('modalResTitle').value.trim();
+        const resource_type = document.getElementById('modalResType').value;
+        const description = document.getElementById('modalResDesc').value.trim();
+
+        if (!title || !description) return;
+
+        fetch("/api/resources/submit", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, resource_type, description })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closeResourceModal();
+                alert("Thank you! Your resource has been shared with the community.");
+                window.location.reload();
+            } else {
+                alert("Error submitting resource: " + (data.error || "Please try again."));
+            }
+        })
+        .catch(err => {
+            console.error("Resource Submit Error:", err);
+            alert("Error submitting resource. Please check connection.");
+        });
+    }
+
+    // 5-4-3-2-1 Sensory Grounding tracking
+    const completedSteps = new Set();
+    function markStepDone(stepId) {
+        completedSteps.add(stepId);
+        const el = document.getElementById(stepId);
+        if (el) el.classList.add('completed');
+    }
+
+    function completeGroundingSession() {
+        if (typeof createConfettiBurst === 'function') {
+            createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2);
+        }
+
+        // Call mini-goal completion endpoint
+        fetch("/api/complete-minigoal", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reward: 15, goal_text: "Completed 5-4-3-2-1 Sensory Grounding Studio" })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("Awesome job! You grounded your senses and earned +15 Mindful Points (Total: " + data.total_points + " MP)!");
+                const pointsDisplay = document.querySelector('.stat-icon-points + span strong');
+                if (pointsDisplay) pointsDisplay.innerText = data.total_points + ' MP';
+            } else {
+                alert("Somatic session complete! Take a deep, gentle breath.");
+            }
+        })
+        .catch(() => {
+            alert("Somatic session complete! Take a deep, gentle breath.");
+        });
+    }
+
+    // Gita Search and Filter
+    let gitaVerses = [];
+    fetch("/api/gita/verses")
+        .then(res => res.json())
+        .then(data => {
+            if (data.verses) gitaVerses = data.verses;
+        })
+        .catch(() => {});
+
+    function filterGitaCategory(category, btn) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+
+        const cards = document.querySelectorAll('.gita-card');
+        cards.forEach(card => {
+            const cardTheme = card.getAttribute('data-theme') || '';
+            if (category === 'all' || cardTheme.toLowerCase().includes(category.toLowerCase())) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function handleGitaSearch() {
+        const query = document.getElementById('gitaSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.gita-card');
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            if (!query || text.includes(query)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

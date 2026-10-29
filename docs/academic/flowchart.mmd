@@ -1,0 +1,40 @@
+flowchart TD
+    Start([Start]) --> WelcomePage["Welcome Page"]
+    WelcomePage -->|Login| Login["Login / Choose Role"]
+    WelcomePage -->|Register| Register["Register Page"]
+
+    Login --> UserLogin["User Login"]
+    Login --> CounselorLogin["Counselor / Professional Login"]
+    Login --> AdminLogin["Admin Login"]
+
+    UserLogin --> Chatbot["Chatbot / Journal"]
+    Chatbot --> Analyze["Analyze Entry (sentiment, crisis detection)"]
+    Analyze -->|Crisis detected| Crisis["Show Helplines & Crisis Flow"]
+    Analyze -->|No crisis| Reframe["Provide Reframe & Mini-Goal"]
+    Reframe --> Store["Store Entry in DB"]
+    Store --> Rewards["Update Streaks & Mindful Points"]
+
+    Chatbot --> Resources["Resources & Community Forum"]
+    Chatbot --> Screenings["Screenings (PHQ-9, GAD-7)"]
+    Chatbot --> Bookings["Counselor Booking Flow"]
+
+    CounselorLogin --> CounselorDashboard["Counselor Dashboard (slots, bookings)"]
+    AdminLogin --> AdminDashboard["Admin Dashboard (stats, manage users)"]
+
+    subgraph Persistence
+        Store
+        DB[(MySQL Database)]
+    end
+    Store --> DB
+
+    subgraph Utilities
+        SMTP["SMTP / Email (optional)"]
+        PDF["PDF Viewer (optional)"]
+    end
+    Bookings --> SMTP
+    Resources --> PDF
+
+    Crisis --> End([End])
+    Rewards --> End
+    AdminDashboard --> End
+    CounselorDashboard --> End

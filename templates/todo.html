@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}To-Do Notes{% endblock %}
+
+{% block style %}
+<style>
+    .todo-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.3fr;
+        gap: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .todo-control {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-family: var(--font-sub);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .todo-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        background: rgba(140, 82, 255, 0.02);
+    }
+
+    .todo-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .todo-item {
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        padding: 1.1rem 1.3rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .todo-item:hover {
+        background: var(--card-bg);
+        border-color: rgba(255, 255, 255, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .todo-item.completed {
+        opacity: 0.6;
+        border-color: rgba(0, 230, 118, 0.1);
+        background: rgba(0, 230, 118, 0.01);
+    }
+
+    .todo-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-family: var(--font-sub);
+        font-size: 0.98rem;
+    }
+
+    .todo-text {
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .todo-item.completed .todo-text {
+        text-decoration: line-through;
+        color: var(--text-secondary);
+    }
+
+    .check-btn {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: transparent;
+        transition: all 0.2s ease;
+    }
+
+    .todo-item.completed .check-btn {
+        background: var(--accent-secondary);
+        border-color: var(--accent-secondary);
+        color: var(--text-primary);
+        box-shadow: 0 0 8px rgba(0, 230, 118, 0.4);
+    }
+
+    .check-btn:hover {
+        border-color: var(--accent-primary);
+    }
+
+    .delete-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+        padding: 0.3rem;
+    }
+
+    .delete-btn:hover {
+        color: var(--accent-alert);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-list-check"></i> To-Do Notes Checklist</h1>
+    <p style="color:var(--text-secondary); font-size:1.05rem;">Keep track of your mental wellness goals and tasks. Completing tasks earns you **15 Mindful Points (MP)**.</p>
+</div>
+
+<div class="todo-layout">
+    <!-- Add Task Card -->
+    <div class="card" style="height: fit-content;">
+        <h2 style="font-size:1.3rem; margin-bottom:1.5rem;"><i class="fa-solid fa-square-plus"></i> Add New Task</h2>
+        
+        <form action="{{ url_for('todo') }}" method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label for="task">Task Description</label>
+                <input type="text" name="task" id="task" class="todo-control" placeholder="e.g., Log my journal entry" required>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
+                <button type="submit" class="btn">
+                    <span>Add Task</span> <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tasks Checklist List -->
+    <div class="todo-list-container">
+        <h2 style="font-size:1.4rem; margin-bottom:0.5rem;"><i class="fa-solid fa-clipboard-list"></i> My Tasks</h2>
+        
+        {% if tasks %}
+            {% for task_id, task_desc, completed in tasks %}
+                <div class="todo-item {% if completed %}completed{% endif %}">
+                    <div class="todo-content">
+                        {% if not completed %}
+                            <form action="{{ url_for('todo') }}" method="POST" style="margin:0;">
+                                <input type="hidden" name="action" value="complete">
+                                <input type="hidden" name="task_id" value="{{ task_id }}">
+                                <button type="submit" class="check-btn">
+                                    <i class="fa-solid fa-check" style="font-size: 0.75rem;"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="check-btn">
+                                <i class="fa-solid fa-check" style="font-size: 0.75rem;"></i>
+                            </div>
+                        {% endif %}
+                        <span class="todo-text">{{ task_desc }}</span>
+                    </div>
+                    
+                    <form action="{{ url_for('todo') }}" method="POST" style="margin:0;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="task_id" value="{{ task_id }}">
+                        <button type="submit" class="delete-btn">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="card" style="text-align:center; padding:3rem; background:rgba(255,255,255,0.01);">
+                <i class="fa-solid fa-circle-check" style="font-size:2rem; color:var(--text-secondary); margin-bottom:1rem;"></i>
+                <p>No tasks added. Add tasks to start earning mindful points!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

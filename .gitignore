@@ -1,4 +1,22 @@
-﻿# Virtual Environment
+# =======================================================
+# Git Ignore Configuration — Sarathi Mental Wellness Platform
+# Ensures no sensitive credentials, secrets, or large blobs are committed
+# =======================================================
+
+# --- Environment & Sensitive Credentials ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+secrets/
+credentials/
+*.pfx
+*.p12
+
+# --- Python Virtual Environments ---
 .venv/
 venv/
 ENV/
@@ -7,8 +25,11 @@ Scripts/
 Lib/
 Include/
 pyvenv.cfg
+bin/
+lib/
+include/
 
-# Python
+# --- Python Bytecode & Build Artifacts ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -18,34 +39,52 @@ __pycache__/
 dist/
 build/
 *.egg
+eggs/
+.eggs/
 
-# IDE
+# --- Temporary & Database Dumps ---
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.sql.gz
+*.bak
+*.tmp
+*.temp
+
+# --- Testing & Code Quality Caches ---
+.cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+
+# --- Operating System & IDE Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
+# --- Deployment & Cloud Artifacts ---
+.vercel/
+node_modules/
+.serverless/
 
-# Project specific
-*.db
-*.sqlite
-*.sqlite3
-.env
-*.log
-
-# Optional
-.cache/
-.pytest_cache/
-.mypy_cache/
-
-# Dependencies download cache
-*.whl
-
-# Session files
-*.jsonl
+# --- External & Unrelated Local Dirs ---
+food_ordering_platform/
+archive/
+share/
 todo_*.json
+
+# --- Large Binary Model Checkpoints (Use JSON matrices) ---
+*.pth
+*.pt
+*.bin
+*.onnx
+*.h5
+*.keras

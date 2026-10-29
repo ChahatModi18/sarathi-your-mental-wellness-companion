@@ -1,3 +1,9 @@
+import os
+import sys
+# Inject the virtual environment's site packages path only if using a compatible Python 3.14 interpreter
+venv_site = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Lib", "site-packages")
+if sys.version_info[:2] == (3, 14) and os.path.isdir(venv_site) and venv_site not in sys.path:
+    sys.path.insert(0, venv_site)
 import tkinter as tk
 from tkinter import messagebox, simpledialog, scrolledtext, ttk, filedialog
 from textblob import TextBlob
@@ -71,15 +77,12 @@ conn = None
 cursor = None
 try:
     # Use environment variables for sensitive data
-    db_password = os.environ.get("chahat")
-    if not "chahat":
-        pass
+    db_password = os.environ.get("DB_PASSWORD", os.environ.get("MYSQL_PASSWORD", os.environ.get("chahat", "chahat")))
 
     conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        # Using a dummy password to allow non-set environment variable run
-        password=os.environ.get("chahat", "chahat")
+        host=os.environ.get("DB_HOST", "localhost"),
+        user=os.environ.get("DB_USER", "root"),
+        password=db_password
     )
     cursor = conn.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS sarathi_sih_db")
@@ -236,9 +239,11 @@ try:
 except mysql.connector.Error as err:
     messagebox.showerror("Database Error", f"Failed to connect to MySQL database: {err}")
     conn = None
+    cursor = None
 except ValueError as verr:
     messagebox.showerror("Configuration Error", str(verr))
     conn = None
+    cursor = None
 
 # ------------------ STATIC DATA & HELPER FUNCTIONS ------------------
 
@@ -416,7 +421,17 @@ mood_keywords = {
     "angry": ["angry", "mad", "furious", "irritated", "annoyed", "frustrated", "enraged", "infuriated", "livid", "exasperated", "indignant", "outraged", "incensed", "resentful","cross","irate","wrathful","heated","fuming","seething","raging","stormy","tempestuous","volatile","fierce","ferocious","vicious","savage","belligerent"],
     "happy": ["happy","awesome","fabulous","joyful", "glad", "smiling", "cheerful", "content", "satisfied", "pleased", "delighted", "jovial", "jubilant", "radiant", "exuberant"," merry","sunny","lighthearted","elated","thrilled","euphoric","jocund"],
     "grateful": ["grateful", "thankful", "blessed", "appreciative", "indebted", "obliged","pleased" , " content","satisfied","joyful","happy","cheerful","delighted","jovial","jubilant","radiant","exuberant","thankful","blessed","appreciative","indebted","obliged","pleased","content","satisfied"],
-    "hopeful": ["hopeful", "looking forward", "optimistic", "confident", "expectant", "assured", "buoyant", "encouraged", "enthusiastic", "inspired", "positive", "upbeat","expectant"]
+    "hopeful": ["hopeful", "looking forward", "optimistic", "confident", "expectant", "assured", "buoyant", "encouraged", "enthusiastic", "inspired", "positive", "upbeat","expectant"],
+    "lonely": ["lonely", "alone", "isolated", "solitary", "alienated", "abandoned", "friendless", "disconnected", "lonesome", "unwanted", "left out"],
+    "burned_out": ["burned out", "burnout", "exhausted", "drained", "overworked", "fatigued", "spent", "depleted", "weary", "frazzled", "no energy"],
+    "guilty": ["guilty", "regretful", "remorseful", "ashamed", "blameworthy", "contrite", "sorry", "penitent", "self-reproach", "my fault"],
+    "insecure": ["insecure", "inadequate", "self-conscious", "unconfident", "imposter", "vulnerable", "inferior", "second-guessing", "unworthy", "not good enough"],
+    "confused": ["confused", "lost", "uncertain", "perplexed", "puzzled", "indecisive", "disoriented", "bewildered", "torn", "don't know what to do"],
+    "envious": ["envious", "jealous", "covetous", "resentful", "bitter", "comparison", "begrudging", "why not me"],
+    "grief_stricken": ["grief", "heartbroken", "bereaved", "mourning", "loss", "bereavement", "sorrowful", "shattered", "aching", "miss them"],
+    "serene": ["serene", "tranquil", "calm", "placid", "unflappable", "still", "centered", "unruffled", "collected", "inner calm"],
+    "inspired": ["inspired", "motivated", "enthusiastic", "invigorated", "driven", "energized", "creative", "stimulated", "empowered", "alive"],
+    "resilient": ["resilient", "strong", "steadfast", "courageous", "persevering", "unyielding", "determined", "brave", "tenacious", "standing tall"]
 }
 
 MOOD_COLORS = {
@@ -439,7 +454,17 @@ MOOD_COLORS = {
     "angry": {"primary": "#E63946", "calm": "#90E0EF"},       # Fiery Red → Cool Aqua
     "happy": {"primary": "#FFCB77", "calm": "#A0CED9"},       # Warm Golden → Soft Blue
     "grateful": {"primary": "#FF6F91", "calm": "#A8E6CF"},   # Warm Pink → Gentle Mint
-    "hopeful": {"primary": "#06D6A0", "calm": "#CDB4DB"}      # Fresh Green → Lavender Mist
+    "hopeful": {"primary": "#06D6A0", "calm": "#CDB4DB"},
+    "lonely": {"primary": "#3A86FF", "calm": "#E2EAFC"},
+    "burned_out": {"primary": "#6C757D", "calm": "#E9D8A6"},
+    "guilty": {"primary": "#9D8189", "calm": "#F4ACB7"},
+    "insecure": {"primary": "#5C677D", "calm": "#D8E2DC"},
+    "confused": {"primary": "#7B2CBF", "calm": "#E0AAFF"},
+    "envious": {"primary": "#2D6A4F", "calm": "#D8F3DC"},
+    "grief_stricken": {"primary": "#1F2421", "calm": "#DCE1DE"},
+    "serene": {"primary": "#48CAE4", "calm": "#CAF0F8"},
+    "inspired": {"primary": "#FFB703", "calm": "#FFE6A7"},
+    "resilient": {"primary": "#588157", "calm": "#DAD7CD"}      # Fresh Green → Lavender Mist
 }
 
 RELAXING_COLOR = "#F0F0F0" # Neutral background if mood is missing a key
@@ -468,7 +493,17 @@ shloks = {
     "angry": [("क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः。", "From anger comes delusion, from delusion the loss of memory.")],
     "happy": [("सुखदुःखे समे कृत्वा लाभालाभौ जयाजयौ。", "Treating happiness and distress, gain and loss, victory and defeat alike."),("सुखं तु नित्यं सुखिनः सदा", "The one who is always happy is truly blessed.")],
     "grateful": [("सन्तुष्टः सततं योगी यथा लभते तिष्ठति。", "The yogi who is always content remains steady in whatever comes."),("आत्मरतिरेव स्यात् आत्मतृप्तश्च मानवः。", "The person who rejoices in the self and is satisfied in the self is truly content.")],
-    "hopeful": [("मां अनन्याश्चिन्तयन्तो ये जनाः पर्युपासते。", "Those who worship me with unwavering devotion — I carry what they lack."),("न हि कल्याणकृत्कश्चिद् दुर्गतिं taata गच्छति。", "One who does good, My friend, never comes to grief.")]
+    "hopeful": [("मां अनन्याश्चिन्तयन्तो ये जनाः पर्युपासते。", "Those who worship me with unwavering devotion — I carry what they lack."),("न हि कल्याणकृत्कश्चिद् दुर्गतिं taata गच्छति。", "One who does good, My friend, never comes to grief.")],
+    "lonely": [("मय्येव मन आधत्स्व मयि बुद्धिं निवेशय। निवसिष्यसि मय्येव अत ऊर्ध्वं न संशयः॥", "Anchor your heart in the sacred presence within; you are eternally accompanied and never truly alone. — BG 12.8")],
+    "burned_out": [("युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु। युक्तस्वप्नावबोधस्य योगो भवति दुःखहा॥", "For one who is balanced in recreation, rest, and work, yoga removes all exhaustion and restores vitality. — BG 6.17")],
+    "guilty": [("अपि चेत्सुदुराचारो भजते मामनन्यभाक्। साधुरेव स मन्तव्यः सम्यग्व्यवसितो हि सः॥", "Even if one has made errors in the past, a sincere turning toward truth and goodness restores the spirit to virtue. — BG 9.30")],
+    "insecure": [("उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥", "Elevate yourself by your own mind; never debase yourself. For the mind alone is your greatest friend, or your fiercest adversary. — BG 6.5")],
+    "confused": [("कार्पण्यदोषोपहतस्वभावः पृच्छामि त्वां धर्मसंमूढचेताः। यच्छ्रेयः स्यान्निश्चितं ब्रूहि तन्मे॥", "When the path feels obscured by doubt, pause and seek the inner light; decisive clarity will emerge from stillness. — BG 2.7")],
+    "envious": [("अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च। निर्ममो निरहङ्कारः समदुःखसुखः क्षमी॥", "One who holds goodwill toward all, free from envy and possessiveness, steady in joy and sorrow, discovers supreme peace. — BG 12.13")],
+    "grief_stricken": [("न जायते म्रियते वा कदाचित्। अजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे॥", "The true essence is eternal; it was never born and never dies. Love transcends physical form and remains timeless. — BG 2.20")],
+    "serene": [("प्रसादे सर्वदुःखानां हानिरस्योपजायते। प्रसन्नचेतसो ह्याशु बुद्धिः पर्यवतिष्ठते॥", "In tranquil serenity, all distress dissolves away; the intellect of a serene mind becomes steadfast and clear. — BG 2.65")],
+    "inspired": [("उत्तिष्ठोत्तिष्ठ भारत। तस्मात्त्वमुत्तिष्ठ यशो लभस्व जित्वा शत्रून्भुङ्क्ष्व राज्यं समृद्धम्॥", "Arise and awaken! Stand forth with noble purpose, channel your gifts, and bring your authentic light to the world. — BG 11.33")],
+    "resilient": [("तं विद्याद् दुःखसंयोगवियोगं योगसञ्ज्ञितम्। स निश्चयेन योक्तव्यो योगोऽनिर्विण्णचेतसा॥", "Know that steadfast state of freedom from sorrow as true yoga. Cultivate this resilience with an undaunted spirit. — BG 6.23")]
 }
 
 # New in-memory data for the Peer Support Forum to simulate a database
@@ -554,17 +589,24 @@ all_moods = list(mood_keywords.keys())
 def detect_text_context(text):
     text_lower = text.lower()
     context_mapping = {
-        "Academic Stress": ["exam", "assignment", "college", "university", "semester", "grades", "deadline", "study", "class", "tuition"],
-        "Career / Work": ["job", "work", "office", "boss", "career", "promotion", "interview", "salary", "deadline", "burnout"],
-        "Relationships": ["relationship", "partner", "girlfriend", "boyfriend", "family", "friend", "marriage", "dating", "breakup"],
-        "Health & Body": ["health", "pain", "illness", "doctor", "sleep", "diet", "exercise", "body", "physical"],
-        "Financial Pressure": ["money", "debt", "loan", "rent", "bills", "savings", "budget", "finance"],
-        "Self-Esteem": ["confidence", "self-worth", "esteem", "worthless", "compare", "body image", "appearance"],
-        "Loss & Grief": ["loss", "grief", "bereavement", "death", "lost", "heartbroken"],
-        "General Wellbeing": ["stress", "anxious", "sad", "happy", "overwhelmed", "angry", "tired"]
+        "Academic Stress": ["exam", "assignment", "college", "university", "semester", "grades", "deadline", "study", "class", "tuition", "professor", "quiz"],
+        "Career / Work": ["job", "work", "office", "boss", "career", "promotion", "interview", "salary", "deadline", "burnout", "manager", "client"],
+        "Relationships": ["relationship", "partner", "girlfriend", "boyfriend", "family", "friend", "marriage", "dating", "breakup", "argument"],
+        "Health & Body": ["health", "pain", "illness", "doctor", "sleep", "diet", "exercise", "body", "physical", "headache", "stomach"],
+        "Financial Pressure": ["money", "debt", "loan", "rent", "bills", "savings", "budget", "finance", "expensive", "afford"],
+        "Self-Esteem": ["confidence", "self-worth", "esteem", "worthless", "compare", "body image", "appearance", "imposter", "inadequate"],
+        "Loss & Grief": ["loss", "grief", "bereavement", "death", "lost", "heartbroken", "mourning", "miss them"],
+        "Social Anxiety & Loneliness": ["lonely", "alone", "isolated", "social anxiety", "party", "awkward", "left out", "no friends", "shyness"],
+        "Family & Home Dynamics": ["parent", "mother", "father", "dad", "mom", "sibling", "household", "home", "relative"],
+        "Burnout & Overwork": ["exhaustion", "no energy", "non-stop", "drained", "can't go on working", "swamped", "overworked"],
+        "Identity & Life Purpose": ["purpose", "meaning of life", "direction", "calling", "passion", "future path", "existential"],
+        "Romantic Heartbreak & Dating": ["broken heart", "rejection", "divorce", "ghosted", "unrequited"],
+        "Sleep & Physical Fatigue": ["insomnia", "can't sleep", "sleep deprivation", "tired", "nightmare", "fatigue"],
+        "Habits & Mind Wandering": ["distracted", "procrastination", "bad habit", "phone addiction", "scroll", "attention", "can't focus"],
+        "General Wellbeing": ["stress", "anxious", "sad", "happy", "overwhelmed", "angry", "tired", "peaceful", "grateful"]
     }
     for label, keywords in context_mapping.items():
-        if any(word in text_lower for word in keywords):
+        if any(re.search(r'\b' + re.escape(word) + r'\b', text_lower) for word in keywords):
             return label
     return "General Wellbeing"
 
@@ -619,8 +661,15 @@ def get_sentiment_enhanced(text):
     text_lower = text.lower()
 
     # Predict mood using custom text classification neural network
-    import wellness_ml
-    overall_mood, _ = wellness_ml.predict_mood(text)
+    overall_mood = "neutral"
+    try:
+        if wellness_ml is not None:
+            overall_mood, _ = wellness_ml.predict_mood(text)
+        else:
+            import wellness_ml
+            overall_mood, _ = wellness_ml.predict_mood(text)
+    except Exception as e:
+        overall_mood = "neutral"
 
     if overall_mood == "neutral":
         for mood_type, keywords in mood_keywords.items():
@@ -3702,7 +3751,14 @@ class WelcomePage(tk.Frame):
     def __init__(self, parent, app):
         super().__init__(parent, bg="#fffaf0")
         self.app = app
-        self.pdf_location = "BhagavadGita_Tri-lingual.pdf" ##########################################
+        _pdf_candidates = [
+            "BhagavadGita_Tri-lingual.pdf",
+            os.path.join(os.path.dirname(__file__), "BhagavadGita_Tri-lingual.pdf"),
+            os.path.join(os.path.dirname(__file__), "assets", "BhagavadGita_Tri-lingual.pdf"),
+            os.path.join(os.path.dirname(__file__), "..", "BhagavadGita_Tri-lingual.pdf"),
+            os.path.join(os.path.dirname(__file__), "..", "gui_desktop", "assets", "BhagavadGita_Tri-lingual.pdf")
+        ]
+        self.pdf_location = next((p for p in _pdf_candidates if os.path.exists(p)), "BhagavadGita_Tri-lingual.pdf")
         self.viewer = None
 
         self.initial_content_frame = tk.Frame(self, bg="#fffaf0")

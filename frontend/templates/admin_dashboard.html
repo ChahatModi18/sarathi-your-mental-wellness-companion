@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarathi Admin & Governance Portal</title>
+
+    <!-- Instant Theme Initializer to prevent flicker -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Newsreader', 'Georgia', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 3.5rem;
+            transition: background 1s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 1.2rem;
+            }
+        }
+
+        /* Top Admin Navbar */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.35rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-style: italic;
+            flex-shrink: 0;
+        }
+
+        /* Navigation Pills */
+        .admin-nav {
+            display: flex;
+            gap: 0.6rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 0.7rem 1.3rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-pill:hover {
+            background: var(--accent-sage-light);
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .nav-pill.active {
+            background: var(--accent-primary);
+            color: #ffffff !important;
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 15px rgba(40, 75, 63, 0.2);
+        }
+
+        .admin-tab {
+            display: none;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .admin-tab.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Friendly Simple Admin Banner */
+        .admin-simple-banner {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 1.8rem 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .admin-quick-actions-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1.1rem;
+        }
+
+        .admin-quick-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.65rem 1.25rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 9999px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .admin-quick-btn:hover {
+            background: var(--accent-sage-light);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        /* KPI Cards Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.4rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 1.6rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            box-shadow: var(--box-shadow-card);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-info span {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 700;
+        }
+
+        .stat-info div {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0.3rem 0 0.2rem 0;
+            letter-spacing: -1px;
+        }
+
+        .stat-info p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            color: var(--accent-primary);
+            opacity: 0.85;
+            background: var(--accent-sage-light);
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 2.2rem;
+            box-shadow: var(--box-shadow-card);
+            margin-bottom: 2rem;
+        }
+
+        /* Search inputs for tables */
+        .admin-table-search {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 0.6rem 1.15rem;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            font-family: var(--font-main);
+            min-width: 260px;
+            transition: all 0.2s ease;
+        }
+
+        .admin-table-search:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(40, 75, 63, 0.12);
+        }
+
+        /* Tables & Contrast Styling */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        td {
+            color: var(--text-primary);
+            font-size: 0.94rem;
+        }
+
+        tr:hover td {
+            background: var(--accent-sage-light);
+            color: var(--text-primary);
+        }
+
+        code {
+            background: var(--code-bg);
+            color: var(--accent-primary);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.86rem;
+            border: 1px solid var(--card-border);
+            font-family: monospace;
+        }
+
+        /* Badges with Full High-Contrast Rules */
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.14);
+            border: 1px solid #d97706;
+            color: #b45309;
+        }
+
+        .badge-approved {
+            background: rgba(5, 150, 105, 0.14);
+            border: 1px solid #059669;
+            color: #047857;
+        }
+
+        .badge-rejected {
+            background: rgba(225, 29, 72, 0.14);
+            border: 1px solid #e11d48;
+            color: #be123c;
+        }
+
+        .badge-available {
+            background: rgba(37, 99, 235, 0.14);
+            border: 1px solid #2563eb;
+            color: #1d4ed8;
+        }
+
+        [data-theme="night"] .badge-pending {
+            color: #fcd34d;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        [data-theme="night"] .badge-approved {
+            color: #6ee7b7;
+            border-color: #10b981;
+            background: rgba(5, 150, 105, 0.2);
+        }
+
+        [data-theme="night"] .badge-rejected {
+            color: #fda4af;
+            border-color: #f43f5e;
+            background: rgba(225, 29, 72, 0.22);
+        }
+
+        [data-theme="night"] .badge-available {
+            color: #93c5fd;
+            border-color: #3b82f6;
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .online-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .online-true {
+            background: #059669;
+            box-shadow: 0 0 8px rgba(5, 150, 105, 0.6);
+        }
+
+        .online-false {
+            background: #94a3b8;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group label {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .form-control {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(40, 75, 63, 0.12);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <a href="/" class="logo">
+            <div class="logo-badge">d</div>
+            <span>SARATHI ENTERPRISE ADMIN CONSOLE & COMMUNITY GOVERNANCE</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap;">
+            <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> System Healthy</span>
+
+            <!-- Universal Theme Selector with Pill Button & Dropdown -->
+            <div class="theme-selector-wrapper">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemeDropdown(event)"
+                    title="Choose Theme Palette">
+                    <i class="fa-solid fa-sun" id="themeToggleIcon"></i>
+                    <span id="themeToggleText">Daylight Mode</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; opacity:0.6; margin-left:3px;"></i>
+                </button>
+                <div class="theme-dropdown-menu" id="themeDropdownMenu">
+                    <button type="button" class="theme-option-item active" data-theme-val="daylight"
+                        onclick="setSarathiTheme('daylight')">
+                        <span class="theme-color-dot" style="background:#284b3f;"></span>
+                        <span>Daylight (Sage)</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="amber"
+                        onclick="setSarathiTheme('amber')">
+                        <span class="theme-color-dot" style="background:#b45309;"></span>
+                        <span>Warm Amber</span>
+                    </button>
+                    <button type="button" class="theme-option-item" data-theme-val="night"
+                        onclick="setSarathiTheme('night')">
+                        <span class="theme-color-dot" style="background:#8c52ff;"></span>
+                        <span>Midnight Cosmic</span>
+                    </button>
+                </div>
+            </div>
+
+            <a href="http://127.0.0.1:8000/docs" target="_blank" class="btn btn-secondary"
+                style="font-size:0.88rem; padding:0.55rem 1.1rem;">
+                <i class="fa-solid fa-bolt"></i> FastAPI Swagger
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary"
+                style="font-size:0.88rem; padding:0.55rem 1.1rem;">
+                <i class="fa-solid fa-arrow-left"></i> Public App
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn"
+                style="background: rgba(225,29,72,0.12); border: 1px solid rgba(225,29,72,0.3); color: #e11d48; font-size:0.88rem; padding:0.55rem 1.1rem; box-shadow:none;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success"
+        style="margin-bottom:1.4rem; padding:0.85rem 1.25rem; border-radius:14px; background:rgba(5,150,105,0.12); border:1px solid #059669; color:#047857; display:flex; align-items:center; gap:0.6rem;">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Navigation Pills -->
+    <nav class="admin-nav">
+        <button class="nav-pill active" onclick="switchAdminTab('overview', this)">
+            <i class="fa-solid fa-chart-pie"></i> Overview & KPIs
+        </button>
+        <button class="nav-pill" onclick="switchAdminTab('counselors', this)">
+            <i class="fa-solid fa-user-doctor"></i> Counselors & Availability
+        </button>
+        <button class="nav-pill" onclick="switchAdminTab('sessions', this)">
+            <i class="fa-solid fa-calendar-check"></i> Sessions & Slot Generator
+        </button>
+        <button class="nav-pill" onclick="switchAdminTab('users', this)">
+            <i class="fa-solid fa-users"></i> Users & Streaks Directory
+        </button>
+        <button class="nav-pill" onclick="switchAdminTab('safety', this)">
+            <i class="fa-solid fa-shield-halved"></i> Safety & Screening Audits
+        </button>
+        <button class="nav-pill" onclick="switchAdminTab('diagnostics', this)">
+            <i class="fa-solid fa-database"></i> Database & Diagnostics
+        </button>
+    </nav>
+
+    <!-- TAB 1: Overview & Metrics -->
+    <div id="tab-overview" class="admin-tab active">
+        <!-- Friendly Guide & Quick Actions Banner -->
+        <div class="admin-simple-banner">
+            <div>
+                <h2 style="font-size:1.45rem; font-weight:700; margin-bottom:0.4rem; color:var(--text-primary);">
+                    Welcome to Sarathi Governance Console
+                </h2>
+                <p style="color:var(--text-secondary); font-size:0.95rem; max-width:680px; margin:0; line-height:1.5;">
+                    Manage verified clinical counselors, authorize appointment requests, adjust mindful reward points,
+                    and review psychiatric screening risks with seamless oversight.
+                </p>
+                <div class="admin-quick-actions-bar">
+                    <button type="button" class="admin-quick-btn"
+                        onclick="switchAdminTab('counselors', document.querySelectorAll('.nav-pill')[1])">
+                        <i class="fa-solid fa-user-plus" style="color:var(--accent-primary);"></i>
+                        <span>Add New Counselor</span>
+                    </button>
+                    <button type="button" class="admin-quick-btn"
+                        onclick="switchAdminTab('sessions', document.querySelectorAll('.nav-pill')[2])">
+                        <i class="fa-solid fa-calendar-plus" style="color:#2563eb;"></i>
+                        <span>Generate Slots</span>
+                    </button>
+                    <a href="{{ url_for('export_data', format='csv') }}" class="admin-quick-btn">
+                        <i class="fa-solid fa-file-csv" style="color:#059669;"></i>
+                        <span>Export All Data (CSV)</span>
+                    </a>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:0.2rem;">Live
+                    System Time</span>
+                <strong id="adminClockText"
+                    style="font-size:1.25rem; color:var(--text-primary); font-variant-numeric:tabular-nums;">--:--:--</strong>
+            </div>
+        </div>
+
+        <!-- KPI Cards Grid with Simple Explanations -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span>Registered Members</span>
+                    <div>{{ stats.users }}</div>
+                    <p>Community members actively logging reflections & cycles</p>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span>Verified Counselors</span>
+                    <div>{{ stats.counselors }}</div>
+                    <p>Licensed practitioners available for appointments</p>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-user-doctor"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span>Booked Consultations</span>
+                    <div>{{ stats.bookings }}</div>
+                    <p>One-on-one sessions requested by clients</p>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span>Reflections Logged</span>
+                    <div>{{ stats.entries }}</div>
+                    <p>Emotional journal entries triaged by Vedic AI</p>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span>Mindful Points</span>
+                    <div style="color: #d97706;">{{ stats.total_points }} MP</div>
+                    <p>Rewards circulating for gratitude & consistency</p>
+                </div>
+                <div class="stat-icon" style="color: #d97706; background: rgba(217, 119, 6, 0.12);"><i
+                        class="fa-solid fa-award"></i></div>
+            </div>
+        </div>
+
+        <!-- Recent Bookings Table with Search Filter -->
+        <div class="card">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 style="font-size: 1.35rem; margin-bottom:0.2rem; color:var(--text-primary);">
+                        <i class="fa-solid fa-clock-rotate-left"
+                            style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                        Recent Consultation Bookings
+                    </h2>
+                    <p style="font-size:0.88rem; color:var(--text-secondary); margin:0;">Review client appointments and
+                        confirm or reschedule sessions.</p>
+                </div>
+                <input type="text" class="admin-table-search" placeholder="Filter bookings by student or counselor..."
+                    oninput="filterAdminTable('bookingsTable', this.value)">
+            </div>
+
+            <div class="table-responsive">
+                <table id="bookingsTable">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Student / Client</th>
+                            <th>Counselor</th>
+                            <th>Requested Time</th>
+                            <th>Status</th>
+                            <th>Quick Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if bookings %}
+                        {% for b_id, u_name, c_name, b_time, b_status in bookings %}
+                        <tr>
+                            <td>#{{ b_id }}</td>
+                            <td><strong>{{ u_name }}</strong></td>
+                            <td>{{ c_name }}</td>
+                            <td style="color:var(--text-secondary);">
+                                {{ b_time.strftime('%b %d, %Y %I:%M %p') if b_time and b_time.strftime is defined else
+                                (b_time or 'N/A') }}
+                            </td>
+                            <td><span class="badge badge-{{ b_status.lower() }}">{{ b_status }}</span></td>
+                            <td>
+                                {% if b_status == 'Pending' %}
+                                <div style="display:flex; gap:0.4rem;">
+                                    <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;">
+                                        <input type="hidden" name="action" value="update_booking_status">
+                                        <input type="hidden" name="booking_id" value="{{ b_id }}">
+                                        <input type="hidden" name="status" value="Approved">
+                                        <button type="submit" class="btn"
+                                            style="padding:0.4rem 0.85rem; font-size:0.8rem; background:#059669;">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;">
+                                        <input type="hidden" name="action" value="update_booking_status">
+                                        <input type="hidden" name="booking_id" value="{{ b_id }}">
+                                        <input type="hidden" name="status" value="Rejected">
+                                        <button type="submit" class="btn"
+                                            style="padding:0.4rem 0.85rem; font-size:0.8rem; background:#e11d48;">Reject</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span style="font-size:0.85rem; color:var(--text-muted);">&mdash; Done</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:var(--text-secondary); padding:2rem;">No
+                                consultation booking sessions recorded yet.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: Counselors & Availability -->
+    <div id="tab-counselors" class="admin-tab">
+        <!-- Add Counselor Card Form -->
+        <div class="card">
+            <h2
+                style="font-size: 1.35rem; margin-bottom: 1.2rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);">
+                <i class="fa-solid fa-user-plus" style="color: var(--accent-primary);"></i>
+                <span>Register & Authorize Verified Counselor</span>
+            </h2>
+            <form action="{{ url_for('admin_dashboard') }}" method="POST">
+                <input type="hidden" name="action" value="add_counselor">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Counselor Username</label>
+                        <input type="text" name="username" class="form-control" required placeholder="e.g. dr_priya">
+                    </div>
+                    <div class="form-group">
+                        <label>Temporary Password</label>
+                        <input type="password" name="password" class="form-control" required
+                            placeholder="Secure temporary password">
+                    </div>
+                    <div class="form-group">
+                        <label>Clinical Specialization</label>
+                        <select name="specialization" class="form-control">
+                            <option value="General Mental Wellness">General Mental Wellness</option>
+                            <option value="Academic & Exam Anxiety">Academic & Exam Anxiety</option>
+                            <option value="Career & Workplace Burnout">Career & Workplace Burnout</option>
+                            <option value="Relationship & Grief Counseling">Relationship & Grief Counseling</option>
+                            <option value="Cognitive Behavioral Therapy (CBT)">Cognitive Behavioral Therapy (CBT)
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn">
+                        <i class="fa-solid fa-user-check"></i> Authorize Counselor
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Active Counselors Table with Live Search -->
+        <div class="card">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <h2 style="font-size: 1.35rem; color:var(--text-primary);">
+                    <i class="fa-solid fa-stethoscope" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                    Registered Mental Health Professionals
+                </h2>
+                <input type="text" class="admin-table-search" placeholder="Filter counselors..."
+                    oninput="filterAdminTable('counselorsTable', this.value)">
+            </div>
+
+            <div class="table-responsive">
+                <table id="counselorsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Specialization</th>
+                            <th>Status</th>
+                            <th>Last Active</th>
+                            <th>Manage Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c_id, c_name, c_spec, c_online, c_login in counselors %}
+                        <tr>
+                            <td>#{{ c_id }}</td>
+                            <td><strong>{{ c_name }}</strong></td>
+                            <td>{{ c_spec }}</td>
+                            <td>
+                                <span style="display:flex; align-items:center; gap:0.4rem;">
+                                    <span class="online-dot online-{{ 'true' if c_online else 'false' }}"></span>
+                                    {{ 'Online / Ready' if c_online else 'Offline' }}
+                                </span>
+                            </td>
+                            <td style="font-size:0.88rem; color:var(--text-secondary);">
+                                {{ c_login.strftime('%b %d, %Y %I:%M %p') if c_login and c_login.strftime is defined
+                                else (c_login or 'Never logged in') }}
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:0.5rem; align-items:center;">
+                                    <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;">
+                                        <input type="hidden" name="action" value="toggle_status">
+                                        <input type="hidden" name="counselor_id" value="{{ c_id }}">
+                                        <button type="submit" class="btn btn-secondary"
+                                            style="padding:0.4rem 0.85rem; font-size:0.82rem;"
+                                            title="Toggle Online/Offline state">
+                                            <i class="fa-solid fa-power-off"></i> Toggle
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;"
+                                        onsubmit="return confirm('Remove counselor #{{ c_id }} ({{ c_name }})?');">
+                                        <input type="hidden" name="action" value="delete_counselor">
+                                        <input type="hidden" name="counselor_id" value="{{ c_id }}">
+                                        <button type="submit" class="btn"
+                                            style="padding:0.4rem 0.75rem; font-size:0.82rem; background:rgba(225,29,72,0.12); color:#e11d48; border:1px solid rgba(225,29,72,0.3); box-shadow:none;"
+                                            title="Delete counselor">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: Sessions & Slots Operations -->
+    <div id="tab-sessions" class="admin-tab">
+        <!-- Automated Slot Generator -->
+        <div class="card">
+            <h2
+                style="font-size: 1.35rem; margin-bottom: 1.2rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-primary);">
+                <i class="fa-solid fa-calendar-plus" style="color: var(--accent-primary);"></i>
+                <span>Automated Consultation Slot Generator</span>
+            </h2>
+            <form action="{{ url_for('admin_dashboard') }}" method="POST">
+                <input type="hidden" name="action" value="create_slots">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select Counselor</label>
+                        <select name="counselor_id" class="form-control" required>
+                            {% for c_id, c_name, c_spec, c_online, c_login in counselors %}
+                            <option value="{{ c_id }}">{{ c_name }} ({{ c_spec }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Days Ahead to Generate</label>
+                        <input type="number" name="days_ahead" class="form-control" value="3" min="1" max="14">
+                    </div>
+                    <div class="form-group">
+                        <label>Slot Start Hour (24-Hour)</label>
+                        <select name="slot_hour" class="form-control">
+                            <option value="10">10:00 AM</option>
+                            <option value="11">11:00 AM</option>
+                            <option value="14">02:00 PM</option>
+                            <option value="16">04:00 PM</option>
+                            <option value="18">06:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn">
+                        <i class="fa-solid fa-bolt"></i> Generate Slots Instantly
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Available & Booked Slots Table -->
+        <div class="card">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <h2 style="font-size: 1.35rem; color:var(--text-primary);">
+                    <i class="fa-solid fa-list-check" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                    Live Slots Directory
+                </h2>
+                <input type="text" class="admin-table-search" placeholder="Filter slots..."
+                    oninput="filterAdminTable('slotsTable', this.value)">
+            </div>
+            <div class="table-responsive">
+                <table id="slotsTable">
+                    <thead>
+                        <tr>
+                            <th>Slot ID</th>
+                            <th>Counselor</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if slots %}
+                        {% for s_id, c_name, s_time, s_avail in slots %}
+                        <tr>
+                            <td>#{{ s_id }}</td>
+                            <td><strong>{{ c_name }}</strong></td>
+                            <td>{{ s_time.strftime('%a, %b %d, %Y at %I:%M %p') if s_time and s_time.strftime is defined
+                                else (s_time or 'N/A') }}</td>
+                            <td>
+                                <span class="badge badge-{{ 'available' if s_avail else 'rejected' }}">
+                                    {{ 'Available' if s_avail else 'Booked' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if s_avail %}
+                                <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;"
+                                    onsubmit="return confirm('Delete slot #{{ s_id }}?');">
+                                    <input type="hidden" name="action" value="delete_slot">
+                                    <input type="hidden" name="slot_id" value="{{ s_id }}">
+                                    <button type="submit" class="btn"
+                                        style="padding:0.35rem 0.75rem; font-size:0.78rem; background:rgba(225,29,72,0.12); color:#e11d48; border:1px solid rgba(225,29,72,0.3); box-shadow:none;">
+                                        <i class="fa-solid fa-trash-can"></i> Remove
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span style="font-size:0.85rem; color:var(--text-muted);">&mdash; Session Booked</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:2rem;">No
+                                active slots found. Click generate above.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: User & Streak Directory -->
+    <div id="tab-users" class="admin-tab">
+        <div class="card">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <h2 style="font-size: 1.35rem; color:var(--text-primary);">
+                    <i class="fa-solid fa-id-badge" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                    Registered User Directory & Streaks
+                </h2>
+                <input type="text" id="userSearchInput" class="admin-table-search" placeholder="Search by username..."
+                    oninput="filterAdminTable('usersTable', this.value)">
+            </div>
+
+            <div class="table-responsive">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Mindful Points</th>
+                            <th>Journal Streak</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Points Adjustment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u_id, u_name, u_pts, u_age, u_gender, u_streak in users_list %}
+                        <tr>
+                            <td>#{{ u_id }}</td>
+                            <td><strong>{{ u_name }}</strong></td>
+                            <td style="color: #d97706; font-weight:700;">{{ u_pts }} MP</td>
+                            <td><span class="badge badge-approved"><i class="fa-solid fa-fire"></i> {{ u_streak }}
+                                    Days</span></td>
+                            <td>{{ u_age or 'N/A' }}</td>
+                            <td>{{ u_gender or 'Not specified' }}</td>
+                            <td>
+                                <form action="{{ url_for('admin_dashboard') }}" method="POST"
+                                    style="display:flex; gap:0.4rem; align-items:center; margin:0;">
+                                    <input type="hidden" name="action" value="reset_points">
+                                    <input type="hidden" name="user_id" value="{{ u_id }}">
+                                    <input type="number" name="points" value="{{ u_pts }}"
+                                        style="width: 75px; padding: 0.35rem 0.55rem; background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; color:var(--text-primary); font-size:0.85rem;">
+                                    <button type="submit" class="btn"
+                                        style="padding:0.35rem 0.75rem; font-size:0.78rem;">Set</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_dashboard') }}" method="POST" style="margin:0;"
+                                    onsubmit="return confirm('Remove user #{{ u_id }} ({{ u_name }}) from database?');">
+                                    <input type="hidden" name="action" value="delete_user">
+                                    <input type="hidden" name="user_id" value="{{ u_id }}">
+                                    <button type="submit" class="btn"
+                                        style="padding:0.35rem 0.75rem; font-size:0.78rem; background:rgba(225,29,72,0.12); color:#e11d48; border:1px solid rgba(225,29,72,0.3); box-shadow:none;"
+                                        title="Delete user">
+                                        <i class="fa-solid fa-user-xmark"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 5: Safety & Crisis Screening Audits -->
+    <div id="tab-safety" class="admin-tab">
+        <div class="card" style="border-color: rgba(225, 29, 72, 0.25); background: rgba(225, 29, 72, 0.02);">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 style="font-size: 1.4rem; color: #e11d48; margin:0 0 0.3rem 0;">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 0.5rem;"></i>
+                        Clinical Mental Health & Crisis Screening Monitor
+                    </h2>
+                    <p style="color: var(--text-secondary); margin:0; font-size:0.92rem;">
+                        Audit log of standardized PHQ-9 (Depression) and GAD-7 (Anxiety) assessments. Severe scores
+                        trigger emergency routing.
+                    </p>
+                </div>
+                <span class="badge badge-rejected" style="font-size:0.85rem;">Crisis Guardian v2.1 Active</span>
+            </div>
+
+            <div class="table-responsive">
+                <table id="safetyTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student / User</th>
+                            <th>Screening Tool</th>
+                            <th>Clinical Score</th>
+                            <th>Severity Category</th>
+                            <th>Timestamp</th>
+                            <th>Helpline Routing</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if screenings_audit %}
+                        {% for s_id, u_name, s_tool, s_score, s_sev, s_time in screenings_audit %}
+                        <tr>
+                            <td>#{{ s_id }}</td>
+                            <td><strong>{{ u_name }}</strong></td>
+                            <td><span class="badge badge-available">{{ s_tool }}</span></td>
+                            <td>
+                                <strong
+                                    style="font-size:1.1rem; color: {% if s_score >= 15 %}#e11d48{% elif s_score >= 10 %}#d97706{% else %}#059669{% endif %};">
+                                    {{ s_score }}
+                                </strong>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge {% if s_score >= 15 %}badge-rejected{% elif s_score >= 10 %}badge-pending{% else %}badge-approved{% endif %}">
+                                    {{ s_sev }}
+                                </span>
+                            </td>
+                            <td style="color:var(--text-secondary); font-size:0.88rem;">
+                                {{ s_time.strftime('%b %d, %Y %I:%M %p') if s_time and s_time.strftime is defined else
+                                (s_time or 'N/A') }}
+                            </td>
+                            <td>
+                                {% if s_score >= 15 %}
+                                <span style="color:#e11d48; font-weight:700;"><i class="fa-solid fa-phone"></i>
+                                    Tele-MANAS (14416) Recommended</span>
+                                {% else %}
+                                <span style="color:#059669;"><i class="fa-solid fa-circle-check"></i> Standard
+                                    Self-Care</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; color:var(--text-secondary); padding:2rem;">No
+                                clinical screening records found.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 6: Database & Diagnostics -->
+    <div id="tab-diagnostics" class="admin-tab">
+        <div class="card">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+                <h2 style="font-size: 1.35rem; color:var(--text-primary);">
+                    <i class="fa-solid fa-server" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                    Relational Schema & Database Health
+                </h2>
+                <a href="{{ url_for('export_data', format='csv') }}" class="btn">
+                    <i class="fa-solid fa-download"></i> Export Journal Archive (CSV)
+                </a>
+            </div>
+            <p style="color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.5;">
+                Connected to local MySQL database <code>sarathi_sih_db</code> with active connection pooling, foreign
+                keys, and cryptographic password hashing.
+            </p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Database Table</th>
+                            <th>Active Engine</th>
+                            <th>Live Records Count</th>
+                            <th>Operational Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if db_stats %}
+                        {% for row in db_stats %}
+                        <tr>
+                            <td><code>{{ row.name }}</code></td>
+                            <td style="color:var(--text-secondary);">InnoDB &bull; Relational Pool</td>
+                            <td><strong>{{ row.count }} Records</strong></td>
+                            <td>
+                                <span
+                                    class="badge {% if row.status == 'Operational' %}badge-approved{% else %}badge-rejected{% endif %}">
+                                    {{ row.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td><code>users</code></td>
+                            <td>InnoDB &bull; Credentials, Streaks, Points</td>
+                            <td><strong>{{ stats.users }} Records</strong></td>
+                            <td><span class="badge badge-approved">Operational</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>journal</code></td>
+                            <td>InnoDB &bull; Moods, Polarities, Shlokas</td>
+                            <td><strong>{{ stats.entries }} Records</strong></td>
+                            <td><span class="badge badge-approved">Operational</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>counselors</code></td>
+                            <td>InnoDB &bull; Verification, Specializations</td>
+                            <td><strong>{{ stats.counselors }} Records</strong></td>
+                            <td><span class="badge badge-approved">Operational</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>bookings</code></td>
+                            <td>InnoDB &bull; Appointments, Approval Flow</td>
+                            <td><strong>{{ stats.bookings }} Records</strong></td>
+                            <td><span class="badge badge-approved">Operational</span></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Tab Switcher with Session Persistence
+        function switchAdminTab(tabName, pillElement) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+
+            const target = document.getElementById('tab-' + tabName);
+            if (target) target.classList.add('active');
+            if (pillElement) pillElement.classList.add('active');
+
+            sessionStorage.setItem('sarathi_active_admin_tab', tabName);
+        }
+
+        // Restore active tab on page reload
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTab = sessionStorage.getItem('sarathi_active_admin_tab');
+            if (savedTab) {
+                const targetPill = Array.from(document.querySelectorAll('.nav-pill')).find(p => p.getAttribute('onclick')?.includes(savedTab));
+                if (targetPill) switchAdminTab(savedTab, targetPill);
+            }
+        });
+
+        // Live Table Search Filter
+        function filterAdminTable(tableId, query) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const q = (query || '').toLowerCase().trim();
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (!q || text.includes(q)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Live Clock for Admin Dashboard
+        function updateAdminClock() {
+            const clock = document.getElementById('adminClockText');
+            if (!clock) return;
+            const now = new Date();
+            clock.innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateAdminClock, 1000);
+        updateAdminClock();
+    </script>
+</body>
+
+</html>

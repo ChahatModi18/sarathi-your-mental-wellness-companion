@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Universal Affirmation Spin Wheel — Sarathi BhagvadMood{% endblock %}
+
+{% block style %}
+<style>
+    .spin-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+
+    .spin-hero {
+        text-align: center;
+        background: radial-gradient(circle at 50% 20%, rgba(140, 82, 255, 0.15) 0%, rgba(13, 10, 31, 0.6) 80%);
+        border: 1px solid rgba(140, 82, 255, 0.25);
+        border-radius: 24px;
+        padding: 2.2rem 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .spin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .spin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .wheel-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .wheel-wrapper {
+        position: relative;
+        width: 360px;
+        height: 360px;
+        filter: drop-shadow(0 0 35px rgba(140, 82, 255, 0.45));
+    }
+
+    @media (max-width: 450px) {
+        .wheel-wrapper {
+            width: 300px;
+            height: 300px;
+        }
+    }
+
+    #spinCanvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .pointer-arrow {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 16px solid transparent;
+        border-right: 16px solid transparent;
+        border-top: 26px solid #ff4d6d;
+        z-index: 20;
+        filter: drop-shadow(0 4px 10px rgba(255, 77, 109, 0.8));
+    }
+
+    .center-hub {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffe082 0%, #ffb300 100%);
+        border: 4px solid #ffffff;
+        box-shadow: 0 0 25px rgba(255, 179, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 15;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .center-hub:hover {
+        transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    .center-hub span {
+        font-family: var(--font-main);
+        font-weight: 900;
+        font-size: 0.95rem;
+        color: #1a0933;
+        letter-spacing: 1px;
+    }
+
+    .spin-actions {
+        margin-top: 1.8rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .btn-spin {
+        background: linear-gradient(135deg, #ff7f50 0%, #ff4d6d 100%);
+        color: var(--text-primary);
+        font-family: var(--font-main);
+        font-weight: 700;
+        font-size: 1.15rem;
+        padding: 0.9rem 2.2rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        box-shadow: 0 0 25px rgba(255, 127, 80, 0.5);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-spin:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 0 35px rgba(255, 127, 80, 0.8);
+    }
+
+    .btn-spin:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    /* Result Reveal Card */
+    .result-card {
+        background: linear-gradient(135deg, rgba(23, 18, 56, 0.95) 0%, rgba(38, 26, 75, 0.95) 100%);
+        border: 1px solid rgba(140, 82, 255, 0.4);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: var(--shadow-glow);
+        display: none;
+        flex-direction: column;
+        gap: 1.4rem;
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .result-card.active {
+        display: flex;
+    }
+
+    .shlok-banner {
+        background: rgba(140, 82, 255, 0.08);
+        border-left: 4px solid var(--accent-primary);
+        padding: 1.2rem;
+        border-radius: 0 16px 16px 0;
+    }
+
+    .sanskrit-verse {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #f7d794;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .recent-spins-box {
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 20px;
+        padding: 1.5rem;
+    }
+
+    .spin-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.9rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .spin-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .spin-icon-bubble {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(140, 82, 255, 0.15);
+        color: var(--accent-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="spin-page-container">
+    <div class="spin-hero">
+        <span class="badge" style="background: rgba(255, 179, 0, 0.15); color: #ffe082; border: 1px solid rgba(255, 179, 0, 0.3); margin-bottom: 0.8rem; display: inline-block;">
+            <i class="fa-solid fa-dharmachakra"></i> Universal Affirmations & Gita Insights
+        </span>
+        <h1 style="font-size: 2.3rem; margin-bottom: 0.6rem; color: var(--text-primary);">
+            Daily Mindful Spin Wheel
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 650px; margin: 0 auto; font-size: 1.05rem; line-height: 1.6;">
+            Spin the wheel to receive a universal affirmation of strength, an authentic paired Bhagavad Gita verse, and bonus Mindful Points! Each affirmation is automatically saved to your mindful reflections.
+        </p>
+    </div>
+
+    <div class="spin-grid">
+        <!-- Wheel Visual Stage -->
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; padding: 2.5rem 1.5rem;">
+            <div class="wheel-stage">
+                <div class="pointer-arrow"></div>
+                <div class="wheel-wrapper">
+                    <canvas id="spinCanvas" width="720" height="720"></canvas>
+                    <div class="center-hub" id="hubSpin" onclick="handleSpinClick()" title="Click to spin!">
+                        <i class="fa-solid fa-gift" style="font-size: 1.2rem; color: #1a0933; margin-bottom: 2px;"></i>
+                        <span>SPIN</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spin-actions">
+                <button class="btn-spin" id="spinBtn" onclick="handleSpinClick()">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Spin for Wisdom</span>
+                </button>
+            </div>
+            
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 1.2rem; text-align: center;">
+                <i class="fa-solid fa-shield-halved"></i> 100% deterministic & offline-ready. Rewards 10 to 50 Mindful Points.
+            </p>
+        </div>
+
+        <!-- Result / Wisdom Showcase & Past History -->
+        <div style="display: flex; flex-direction: column; gap: 1.8rem;">
+            <!-- Active Result Card -->
+            <div class="result-card" id="resultCard">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3);">
+                        <i class="fa-solid fa-circle-check"></i> Bonus Earned: +<span id="resPoints">0</span> MP
+                    </span>
+                    <button class="audio-btn" id="resTtsBtn" onclick="speakResultWisdom()" title="Listen to affirmation & verse">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                </div>
+
+                <div>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;">Universal Affirmation</span>
+                    <h2 id="resAffirmation" style="font-size: 1.85rem; color: var(--text-primary); margin-top: 0.3rem; font-family: var(--font-main);">
+                        "You are enough."
+                    </h2>
+                </div>
+
+                <div class="shlok-banner">
+                    <div class="sanskrit-verse" id="resShlok">
+                        आत्मरतिरेव स्यात् आत्मतृप्तश्च मानवः।
+                    </div>
+                    <p id="resMeaning" style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+                        The person who rejoices in the self and is satisfied within is truly content. — BG 3.17
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">
+                        <i class="fa-solid fa-bookmark" style="color: var(--accent-secondary);"></i> Added to your Journal Reflections
+                    </span>
+                    <a href="{{ url_for('dashboard') }}" class="btn" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
+                        View Journal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Spin Messages List (Desktop EntriesFrame Parity) -->
+            <div class="recent-spins-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.2rem; color: var(--text-primary); margin: 0;">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-secondary); margin-right: 0.4rem;"></i>
+                        Recent Affirmations
+                    </h3>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Saved Reflections</span>
+                </div>
+
+                <div id="recentSpinsList">
+                    {% if recent_spins and recent_spins|length > 0 %}
+                        {% for spin in recent_spins %}
+                        <div class="spin-item">
+                            <div class="spin-icon-bubble">
+                                <i class="fa-solid fa-dharmachakra"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                    <h4 style="font-size: 1.05rem; color: var(--text-primary); margin: 0 0 0.2rem 0;">{{ spin.thought }}</h4>
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ spin.time }}</span>
+                                </div>
+                                <div style="font-size: 0.95rem; color: #f7d794; margin-bottom: 0.2rem;">{{ spin.shlok }}</div>
+                                <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">{{ spin.meaning }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary);">
+                            <i class="fa-solid fa-sparkles" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.8rem;"></i>
+                            <p style="margin: 0; font-size: 0.95rem;">Spin the wheel above to unlock your first universal affirmation!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // 7 Universal Messages matching Desktop SpinWheelFrame
+    const segments = [
+        { message: "You are enough.", points: 10, bg: "#361b4d", text: "#ffd4da", border: "#ff7f50" },
+        { message: "Breathe - one step.", points: 15, bg: "#232654", text: "#ffe6ba", border: "#fbc531" },
+        { message: "This too shall pass.", points: 20, bg: "#163a3d", text: "#e6ffd3", border: "#4cd137" },
+        { message: "Small progress.", points: 25, bg: "#192a56", text: "#d8f0ff", border: "#00a8ff" },
+        { message: "Loved & seen.", points: 30, bg: "#2c1f4d", text: "#e8d6ff", border: "#9c88ff" },
+        { message: "Be kind to self.", points: 40, bg: "#42183b", text: "#ffc9de", border: "#e84118" },
+        { message: "Trust your path.", points: 50, bg: "#3c3314", text: "#fff6c8", border: "#f5cd79" }
+    ];
+
+    const canvas = document.getElementById('spinCanvas');
+    const ctx = canvas.getContext('2d');
+    const numSegments = segments.length;
+    const arcSize = (2 * Math.PI) / numSegments;
+
+    let currentAngle = 0;
+    let isSpinning = false;
+    let latestResult = null;
+
+    // Synthetic audio click cues using Web Audio API
+    let audioCtx = null;
+    function playTickSound() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        } catch (e) {
+            // Audio context silently ignored if blocked
+        }
+    }
+
+    // Render Canvas Wheel
+    function drawWheel(angle) {
+        const width = canvas.width;
+        const height = canvas.height;
+        const cx = width / 2;
+        const cy = height / 2;
+        const radius = width / 2 - 20;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw Outer Rim with metallic glow
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 12, 0, 2 * Math.PI);
+        const rimGrad = ctx.createLinearGradient(0, 0, width, height);
+        rimGrad.addColorStop(0, '#8c52ff');
+        rimGrad.addColorStop(0.5, '#ffd700');
+        rimGrad.addColorStop(1, '#ff4d6d');
+        ctx.lineWidth = 14;
+        ctx.strokeStyle = rimGrad;
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw Segments
+        for (let i = 0; i < numSegments; i++) {
+            const startAngle = angle + (i * arcSize);
+            const endAngle = startAngle + arcSize;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radius, startAngle, endAngle);
+            ctx.closePath();
+
+            // Segment Fill
+            ctx.fillStyle = segments[i].bg;
+            ctx.fill();
+
+            // Segment Outline
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.stroke();
+
+            // Segment Text
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(startAngle + arcSize / 2);
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+
+            // Text Affirmation
+            ctx.fillStyle = segments[i].text;
+            ctx.font = 'bold 26px "Plus Jakarta Sans", sans-serif';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 6;
+            ctx.fillText(segments[i].message, radius - 35, -12);
+
+            // Points Tag
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 20px "Cinzel", Georgia, serif';
+            ctx.fillText(`+${segments[i].points} MP`, radius - 35, 18);
+
+            ctx.restore();
+            ctx.restore();
+        }
+    }
+
+    // Initial Wheel Draw
+    drawWheel(currentAngle);
+
+    function handleSpinClick() {
+        if (isSpinning) return;
+        isSpinning = true;
+
+        const spinBtn = document.getElementById('spinBtn');
+        spinBtn.disabled = true;
+
+        // Choose random target segment index
+        const targetIndex = Math.floor(Math.random() * numSegments);
+
+        // Pointer is at the TOP (angle = 3 * Math.PI / 2 or -Math.PI / 2)
+        // Segment center at top requires:
+        // (currentAngle + targetIndex * arcSize + arcSize / 2) % (2 * Math.PI) === (3 * Math.PI / 2)
+        const pointerAngle = 1.5 * Math.PI;
+        const targetCenterAngle = (targetIndex * arcSize) + (arcSize / 2);
+        
+        // Number of full rotations
+        const fullSpins = 5 + Math.floor(Math.random() * 3);
+        const destinationAngle = (fullSpins * 2 * Math.PI) + (pointerAngle - targetCenterAngle);
+
+        const startTime = performance.now();
+        const duration = 4500; // 4.5 seconds smooth spin
+        const startAngle = currentAngle % (2 * Math.PI);
+        const totalDelta = destinationAngle - startAngle;
+
+        let lastTickSegment = -1;
+
+        function animate(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Cubic ease-out deceleration
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            currentAngle = startAngle + (totalDelta * easeOut);
+
+            drawWheel(currentAngle);
+
+            // Tick sound tracking
+            const normalizedAngle = (pointerAngle - currentAngle) % (2 * Math.PI);
+            const positiveAngle = normalizedAngle < 0 ? normalizedAngle + 2 * Math.PI : normalizedAngle;
+            const currentHoverSegment = Math.floor(positiveAngle / arcSize);
+            if (currentHoverSegment !== lastTickSegment) {
+                lastTickSegment = currentHoverSegment;
+                playTickSound();
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                finalizeSpin(targetIndex);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    function finalizeSpin(index) {
+        // Send request to server to log the affirmation & points
+        fetch("{{ url_for('spinwheel') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ index: index })
+        })
+        .then(res => res.json())
+        .then(data => {
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+            latestResult = data;
+
+            // Trigger Confetti Burst
+            if (typeof createConfettiBurst === 'function') {
+                createConfettiBurst(window.innerWidth / 2, window.innerHeight / 2.5);
+            }
+
+            // Reveal Result Card
+            const resultCard = document.getElementById('resultCard');
+            resultCard.classList.add('active');
+            document.getElementById('resPoints').innerText = data.points_won;
+            document.getElementById('resAffirmation').innerText = `"${data.message}"`;
+            document.getElementById('resShlok').innerText = data.shlok;
+            document.getElementById('resMeaning').innerText = data.meaning;
+
+            // Update Navbar Mindful Points dynamically
+            const pointsDisplay = document.querySelector('.stat-icon-points + span strong');
+            if (pointsDisplay) {
+                pointsDisplay.innerText = `${data.total_points} MP`;
+            }
+
+            // Scroll smoothly to result on smaller screens
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        })
+        .catch(err => {
+            console.error("Spin Wheel Error:", err);
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+        });
+    }
+
+    function speakResultWisdom() {
+        if (!latestResult) return;
+        const textToSpeak = `${latestResult.message}. Sanskrit wisdom: ${latestResult.shlok}. Meaning: ${latestResult.meaning}`;
+        if (typeof speakWisdom === 'function') {
+            speakWisdom(textToSpeak, document.getElementById('resTtsBtn'));
+        }
+    }
+</script>
+{% endblock %}

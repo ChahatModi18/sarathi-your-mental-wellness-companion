@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Screenings - Assessments{% endblock %}
+
+{% block style %}
+<style>
+    .screenings-layout {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+    }
+
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .q-row {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1.2rem 0;
+    }
+
+    .q-text {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 0.8rem;
+        color: var(--text-primary);
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+
+    .option-btn {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        align-items: center;
+    }
+
+    .option-btn input {
+        display: none;
+    }
+
+    .option-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .option-btn.selected {
+        background: rgba(140, 82, 255, 0.15);
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 10px rgba(140, 82, 255, 0.2);
+    }
+
+    .score-summary-bar {
+        background: rgba(140, 82, 255, 0.05);
+        border: 1px solid rgba(140, 82, 255, 0.15);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+
+    .badge-risk {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        font-family: var(--font-main);
+        text-transform: uppercase;
+    }
+
+    .risk-low {
+        background: rgba(0, 230, 118, 0.15);
+        border: 1px solid var(--accent-secondary);
+        color: #79ffb2;
+    }
+    
+    .risk-medium {
+        background: rgba(255, 234, 0, 0.12);
+        border: 1px solid var(--accent-warning);
+        color: #fffa79;
+    }
+
+    .risk-high {
+        background: rgba(255, 23, 68, 0.15);
+        border: 1px solid var(--accent-alert);
+        color: #ffcbd4;
+    }
+
+    .history-card-item {
+        background: var(--input-bg);
+        border: 1px solid var(--card-border);
+        padding: 1.2rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="screenings-layout">
+    <!-- Questionnaire Card -->
+    <div class="card" style="margin-bottom:0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem; margin-bottom:1.5rem;">
+            <h2 style="font-size:1.6rem;"><i class="fa-solid fa-square-poll-vertical"></i> Assessment Form</h2>
+            
+            <select id="tool-selector" class="btn btn-secondary" style="font-size:0.9rem; padding:0.5rem 1rem;" onchange="switchTool()">
+                <option value="PHQ-9">PHQ-9 (Depression)</option>
+                <option value="GAD-7">GAD-7 (Anxiety)</option>
+            </select>
+        </div>
+
+        <form action="{{ url_for('screenings') }}" method="POST" id="assessment-form">
+            <!-- Hidden input fields -->
+            <input type="hidden" name="tool_name" id="form-tool-name" value="PHQ-9">
+            <input type="hidden" name="score" id="form-score" value="0">
+
+            <p style="margin-bottom:1.5rem; font-size:0.95rem;">Over the last 2 weeks, how often have you been bothered by any of the following problems?</p>
+
+            <div id="questions-container">
+                <!-- Loaded dynamically by JavaScript -->
+            </div>
+
+            <!-- Score Summary and Submit -->
+            <div class="score-summary-bar">
+                <div>
+                    <span style="color:var(--text-secondary); font-size:0.9rem; display:block;">Current Score</span>
+                    <strong style="font-size:1.4rem; color: var(--text-primary);"><span id="live-score">0</span> <span id="max-possible">/ 27</span></strong>
+                </div>
+                <div>
+                    <span style="color:var(--text-secondary); font-size:0.9rem; display:block; text-align:right;">Classification</span>
+                    <strong id="live-risk" class="badge-risk risk-low">Minimal Depression</strong>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
+                <button type="submit" class="btn">
+                    <span>Log Assessment</span> <i class="fa-solid fa-cloud-arrow-up"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- History list -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        <h2 style="font-size:1.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Screening History</h2>
+        
+        <div style="max-height:calc(100vh - 120px); overflow-y:auto; padding-right:0.5rem;">
+            {% if screenings %}
+                {% for tool, score, risk, timestamp in screenings %}
+                    <div class="history-card-item">
+                        <div>
+                            <strong style="color: var(--text-primary); font-size:1.05rem; display:block;">{{ tool }}</strong>
+                            <span style="font-size:0.8rem; color:var(--text-secondary); font-family:var(--font-sub);">{{ timestamp.strftime('%b %d, %Y %I:%M %p') }}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <strong style="font-size:1.2rem; color: var(--text-primary); display:block; margin-bottom:0.3rem;">{{ score }}</strong>
+                            <span class="badge-risk {% if 'High' in risk %}risk-high{% elif 'Medium' in risk %}risk-medium{% else %}risk-low{% endif %}">{{ risk.split('(')[0].strip() }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="card" style="text-align:center; padding:3rem; background:rgba(255,255,255,0.01);">
+                    <i class="fa-solid fa-clipboard-question" style="font-size:2rem; color:var(--text-secondary); margin-bottom:1rem;"></i>
+                    <p>No screening records found. Log your first assessment!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const questions = {
+        "PHQ-9": [
+            "Little interest or pleasure in doing things?",
+            "Feeling down, depressed, or hopeless?",
+            "Trouble falling or staying asleep, or sleeping too much?",
+            "Feeling tired or having little energy?",
+            "Poor appetite or overeating?",
+            "Feeling bad about yourself — or that you are a failure or have let yourself or your family down?",
+            "Trouble concentrating on things, such as reading the newspaper or watching television?",
+            "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
+            "Thoughts that you would be better off dead, or of hurting yourself in some way?"
+        ],
+        "GAD-7": [
+            "Feeling nervous, anxious, or on edge?",
+            "Not being able to stop or control worrying?",
+            "Worrying too much about different things?",
+            "Trouble relaxing?",
+            "Being so restless that it's hard to sit still?",
+            "Becoming easily annoyed or irritable?",
+            "Feeling afraid as if something awful might happen?"
+        ]
+    };
+
+    const options = [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+    ];
+
+    function switchTool() {
+        const tool = document.getElementById('tool-selector').value;
+        document.getElementById('form-tool-name').value = tool;
+        document.getElementById('max-possible').innerText = tool === 'PHQ-9' ? '/ 27' : '/ 21';
+        
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        
+        questions[tool].forEach((q, idx) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'q-row';
+            
+            let optionsHtml = '';
+            options.forEach((opt, oIdx) => {
+                optionsHtml += `
+                    <label class="option-btn" id="lbl-${tool}-${idx}-${oIdx}">
+                        <input type="radio" name="q-${idx}" value="${oIdx}" required onchange="updateScore('${tool}', ${idx}, ${oIdx})">
+                        <span style="font-size:1.1rem; font-weight:700; color: var(--text-primary);">${oIdx}</span>
+                        <span>${opt}</span>
+                    </label>
+                `;
+            });
+            
+            qDiv.innerHTML = `
+                <div class="q-text">${idx + 1}. ${q}</div>
+                <div class="options-grid">
+                    ${optionsHtml}
+                </div>
+            `;
+            container.appendChild(qDiv);
+        });
+        
+        updateLiveResults(tool, 0);
+    }
+
+    const selectedAnswers = {};
+
+    function updateScore(tool, qIdx, scoreVal) {
+        selectedAnswers[qIdx] = scoreVal;
+        
+        // Remove 'selected' class from siblings
+        for (let i = 0; i < 4; i++) {
+            const lbl = document.getElementById(`lbl-${tool}-${qIdx}-${i}`);
+            if (lbl) {
+                lbl.classList.toggle('selected', i === scoreVal);
+            }
+        }
+        
+        // Calculate sum
+        let total = 0;
+        const qCount = questions[tool].length;
+        for (let i = 0; i < qCount; i++) {
+            if (selectedAnswers[i] !== undefined) {
+                total += selectedAnswers[i];
+            }
+        }
+        
+        updateLiveResults(tool, total);
+    }
+
+    function updateLiveResults(tool, total) {
+        document.getElementById('live-score').innerText = total;
+        document.getElementById('form-score').value = total;
+        
+        const riskBadge = document.getElementById('live-risk');
+        
+        if (tool === 'PHQ-9') {
+            if (total >= 20) {
+                riskBadge.innerText = 'Severe Depression';
+                riskBadge.className = 'badge-risk risk-high';
+            } else if (total >= 15) {
+                riskBadge.innerText = 'Moderately Severe';
+                riskBadge.className = 'badge-risk risk-high';
+            } else if (total >= 10) {
+                riskBadge.innerText = 'Moderate Depression';
+                riskBadge.className = 'badge-risk risk-medium';
+            } else if (total >= 5) {
+                riskBadge.innerText = 'Mild Depression';
+                riskBadge.className = 'badge-risk risk-medium';
+            } else {
+                riskBadge.innerText = 'Minimal Depression';
+                riskBadge.className = 'badge-risk risk-low';
+            }
+        } else { // GAD-7
+            if (total >= 15) {
+                riskBadge.innerText = 'Severe Anxiety';
+                riskBadge.className = 'badge-risk risk-high';
+            } else if (total >= 10) {
+                riskBadge.innerText = 'Moderate Anxiety';
+                riskBadge.className = 'badge-risk risk-medium';
+            } else if (total >= 5) {
+                riskBadge.innerText = 'Mild Anxiety';
+                riskBadge.className = 'badge-risk risk-medium';
+            } else {
+                riskBadge.innerText = 'Minimal Anxiety';
+                riskBadge.className = 'badge-risk risk-low';
+            }
+        }
+    }
+
+    // Initialize
+    switchTool();
+</script>
+{% endblock %}

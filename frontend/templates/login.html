@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="daylight">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarathi — Authentication Portal</title>
+    
+    <!-- Instant Theme Initializer to prevent flicker -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('sarathi_theme') || 'daylight';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Global Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+            --font-serif: 'Newsreader', 'Georgia', serif;
+            --font-sub: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+            overflow-x: hidden;
+            transition: background 1s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+        }
+
+        .auth-container {
+            width: 1040px;
+            max-width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 28px;
+            box-shadow: var(--box-shadow-card);
+            display: flex;
+            overflow: hidden;
+            z-index: 10;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Left Info / Branding Panel */
+        .info-panel {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(40, 75, 63, 0.06) 0%, rgba(226, 234, 220, 0.35) 100%);
+            border-right: 1.5px solid var(--card-border);
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        [data-theme="amber"] .info-panel {
+            background: linear-gradient(135deg, rgba(180, 83, 9, 0.08) 0%, rgba(254, 243, 199, 0.45) 100%);
+        }
+
+        [data-theme="night"] .info-panel {
+            background: linear-gradient(135deg, rgba(140, 82, 255, 0.12) 0%, rgba(23, 18, 56, 0.95) 100%);
+        }
+
+        .brand-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-badge-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-style: italic;
+            flex-shrink: 0;
+        }
+
+        .brand-heading {
+            font-family: var(--font-serif);
+            font-size: 2.8rem;
+            font-weight: 600;
+            line-height: 1.12;
+            letter-spacing: -0.8px;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .brand-subtext {
+            color: var(--text-secondary);
+            font-family: var(--font-sub);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .info-feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .info-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            background: var(--accent-sage-light);
+            border: 1px solid var(--card-border);
+            padding: 0.75rem;
+            border-radius: 14px;
+            color: var(--accent-primary);
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .feature-title {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .feature-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-family: var(--font-sub);
+        }
+
+        /* Right Forms Panel */
+        .forms-panel {
+            flex: 1.15;
+            padding: 3.5rem 3.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Tabs Header */
+        .tabs-header {
+            display: flex;
+            border-bottom: 1.5px solid var(--card-border);
+            margin-bottom: 1.8rem;
+            gap: 1.8rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 1.15rem;
+            font-weight: 600;
+            padding: 0.85rem 0;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.25s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1.5px;
+            left: 0;
+            width: 100%;
+            height: 2.5px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        /* Role Selector Pills */
+        .role-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            padding: 0.35rem;
+            border-radius: 14px;
+            margin-bottom: 1.8rem;
+        }
+
+        .role-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 0.6rem 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .role-btn.active {
+            background: var(--accent-primary);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(40, 75, 63, 0.25);
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1.15rem;
+            color: var(--text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            border-radius: 14px;
+            padding: 0.85rem 1.2rem 0.85rem 2.8rem;
+            color: var(--text-primary) !important;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 3px rgba(40, 75, 63, 0.12);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        .register-fields {
+            display: none;
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Submit Button (Pill Shape) */
+        .btn-submit {
+            width: 100%;
+            background: var(--accent-primary);
+            border: none;
+            color: #ffffff;
+            padding: 0.95rem 1.6rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 18px rgba(40, 75, 63, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(40, 75, 63, 0.28);
+        }
+
+        /* High-Contrast Flash Messages */
+        .flash-box {
+            padding: 0.85rem 1.25rem;
+            border-radius: 14px;
+            margin-bottom: 1.5rem;
+            font-family: var(--font-main);
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            background: rgba(225, 29, 72, 0.12);
+            border: 1px solid #e11d48;
+            color: #be123c;
+            font-weight: 600;
+        }
+        
+        .flash-box-success {
+            background: rgba(5, 150, 105, 0.12);
+            border: 1px solid #059669;
+            color: #047857;
+            font-weight: 600;
+        }
+
+        [data-theme="night"] .flash-box-success {
+            background: rgba(5, 150, 105, 0.2);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        [data-theme="night"] .flash-box {
+            background: rgba(225, 29, 72, 0.2);
+            border-color: #f43f5e;
+            color: #fda4af;
+        }
+
+        @media (max-width: 900px) {
+            .auth-container { flex-direction: column; }
+            .info-panel { border-right: none; border-bottom: 1.5px solid var(--card-border); padding: 2.5rem 1.8rem; }
+            .forms-panel { padding: 2.5rem 1.8rem; }
+            .brand-heading { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Universal Theme Selector -->
+    <div style="position:fixed; top:1.5rem; right:1.5rem; z-index:100;">
+        <div class="theme-selector-wrapper">
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemeDropdown(event)" title="Choose Theme Palette">
+                <i class="fa-solid fa-sun" id="themeToggleIcon"></i>
+                <span id="themeToggleText">Daylight Mode</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; opacity:0.6; margin-left:3px;"></i>
+            </button>
+            <div class="theme-dropdown-menu" id="themeDropdownMenu">
+                <button type="button" class="theme-option-item active" data-theme-val="daylight" onclick="setSarathiTheme('daylight')">
+                    <span class="theme-color-dot" style="background:#284b3f;"></span>
+                    <span>Daylight (Sage)</span>
+                </button>
+                <button type="button" class="theme-option-item" data-theme-val="amber" onclick="setSarathiTheme('amber')">
+                    <span class="theme-color-dot" style="background:#b45309;"></span>
+                    <span>Warm Amber</span>
+                </button>
+                <button type="button" class="theme-option-item" data-theme-val="night" onclick="setSarathiTheme('night')">
+                    <span class="theme-color-dot" style="background:#8c52ff;"></span>
+                    <span>Midnight Cosmic</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <!-- Branding Panel -->
+        <div class="info-panel">
+            <div>
+                <div class="brand-badge-row">
+                    <div class="brand-badge-dot">d</div>
+                    <span style="font-weight:700; font-size:1.1rem; letter-spacing:0.5px; color:var(--accent-primary); text-transform:uppercase;">BhagvadMood</span>
+                </div>
+                <h1 class="brand-heading">Sarathi: Bhagvad Mood Journal</h1>
+                <p class="brand-subtext">Your AI-guided companion for mental wellness. Reframe negative patterns, explore Gita shloks, check screening scores, and schedule counselor slots.</p>
+            </div>
+            
+            <div class="info-feature-list">
+                <div class="info-feature">
+                    <i class="fa-solid fa-brain feature-icon"></i>
+                    <div>
+                        <strong class="feature-title">PyTorch ML Diagnostics</strong>
+                        <p class="feature-desc">Runs advanced neural models locally for resource mapping, mood classification, and safety checks.</p>
+                    </div>
+                </div>
+                
+                <div class="info-feature">
+                    <i class="fa-solid fa-award feature-icon"></i>
+                    <div>
+                        <strong class="feature-title">Gamified Rewards</strong>
+                        <p class="feature-desc">Earn Mindful Points (MP) for daily reflections, complete personalized mini-goals, and spin the wheel.</p>
+                    </div>
+                </div>
+
+                <div class="info-feature">
+                    <i class="fa-solid fa-venus feature-icon"></i>
+                    <div>
+                        <strong class="feature-title">Period & Menstrual Wellness</strong>
+                        <p class="feature-desc">Track physical symptoms, cycle rhythms, and receive tailored Vedic psychological reframing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forms Panel -->
+        <div class="forms-panel">
+            <!-- Tabs -->
+            <div style="margin-bottom: 1.25rem;">
+                {% if portal_title %}
+                    <div style="display:inline-flex; align-items:center; gap:0.45rem; background:var(--accent-sage-light); border:1px solid var(--card-border); padding:0.35rem 0.85rem; border-radius:30px; font-size:0.8rem; font-weight:700; color:var(--accent-primary); margin-bottom:0.75rem;">
+                        <i class="fa-solid fa-shield-halved"></i> {{ portal_title }}
+                    </div>
+                {% endif %}
+                <h2 style="font-family: var(--font-serif); font-size: 1.65rem; color: var(--text-primary); margin-bottom: 0.35rem; font-weight: 600;">Welcome to Sarathi</h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); font-family: var(--font-sub);">Your personal sanctuary for mindful emotional reflection & clinical wellness.</p>
+            </div>
+            <div class="tabs-header">
+                <button class="tab-btn active" id="tab-login" onclick="toggleMode('login')">Login</button>
+                <button class="tab-btn" id="tab-register" onclick="toggleMode('register')">Create Account</button>
+            </div>
+
+            <!-- Flash alerts with verified high contrast -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-box {% if category == 'success' %}flash-box-success{% endif %}">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Role Selection -->
+            <div class="role-selector" id="role-selector-container">
+                <button type="button" class="role-btn active" onclick="selectRole('student')">Student</button>
+                <button type="button" class="role-btn" onclick="selectRole('counselor')">Counselor</button>
+                <button type="button" class="role-btn" onclick="selectRole('admin')">Admin</button>
+            </div>
+
+            <form action="{{ url_for('login') }}" method="POST" id="auth-form">
+                <!-- Role field -->
+                <input type="hidden" name="role" id="form-role" value="student">
+                
+                <!-- Common Fields -->
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <!-- Registration Fields (hidden during login) -->
+                <div class="register-fields" id="reg-fields-box">
+                    <div class="form-group" id="email-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="name@domain.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="account-purpose-group">
+                        <label for="account_for">Who is this account for?</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-users"></i>
+                            <select name="account_for" id="account_for" class="form-control" onchange="toggleAccountPurpose(this.value)">
+                                <option value="Self">Myself (Personal Account)</option>
+                                <option value="Dependent">Managing for Someone Else / Dependent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="managing-rel-group" style="display:none;">
+                        <label for="managing_relationship">Relationship to Person</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-hand-holding-heart"></i>
+                            <select name="managing_relationship" id="managing_relationship" class="form-control">
+                                <option value="Wife">Wife / Partner</option>
+                                <option value="Daughter">Daughter</option>
+                                <option value="Sister">Sister</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Child">Child / Student</option>
+                                <option value="Friend">Friend / Peer</option>
+                                <option value="Dependent">Other Dependent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="gender-group">
+                        <label for="gender">Your Gender</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-venus-mars"></i>
+                            <select name="gender" id="gender" class="form-control" onchange="handleGenderSelect(this.value)">
+                                <option value="female">Female</option>
+                                <option value="male">Male (Ally / Caregiver Mode Available)</option>
+                                <option value="not_specified">Other / Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="male-caregiver-hint" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:12px; background:var(--accent-sage-light); font-size:0.85rem; color:var(--text-secondary); line-height:1.45;">
+                        <strong style="color:var(--accent-primary);"><i class="fa-solid fa-circle-info"></i> Male Ally Access:</strong> You will be able to manage menstrual health tracking and wellness reminders for multiple women in your life (Wife, Daughter, Sister).
+                    </div>
+
+                    <div class="form-group" id="age-group">
+                        <label for="age">Age</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="number" name="age" id="age" class="form-control" placeholder="Enter age" min="10" max="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="specialization-group" style="display:none;">
+                        <label for="specialization">Counselor Specialization</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <select name="specialization" id="specialization" class="form-control">
+                                <option value="General Wellness">General Mental Wellness</option>
+                                <option value="Anxiety/Stress">Anxiety & Stress Management</option>
+                                <option value="Academic Support">Academic & Exam Anxiety</option>
+                                <option value="Relationship Therapy">Relationship & Grief Counseling</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="conditions-group">
+                        <label for="conditions">Diagnosed Conditions (Optional)</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-file-waveform"></i>
+                            <input type="text" name="conditions" id="conditions" class="form-control" placeholder="e.g., Anxiety, Depression, Burnout">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="counselor-reg-cta" style="display:none; margin-top:1rem; padding:0.9rem 1.1rem; border-radius:14px; background:var(--accent-sage-light); border:1px solid var(--card-border); text-align:center;">
+                    <span style="font-size:0.88rem; color:var(--text-secondary);">Licensed or practicing mental health professional?</span>
+                    <div style="margin-top:0.35rem;">
+                        <a href="{{ url_for('register_counselor') }}" style="color:var(--accent-primary); font-weight:700; font-size:0.92rem; text-decoration:none;">
+                            <i class="fa-solid fa-user-doctor"></i> Register as a Verified Counselor &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submit-btn" style="margin-top:1rem;">
+                    <span>Login to Account</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+
+            <div style="margin-top: 1.8rem; padding-top: 1.2rem; border-top: 1px solid var(--card-border); text-align: center; font-size: 0.84rem; color: var(--text-secondary);">
+                <span style="font-weight: 600;">Dedicated Portals:</span>
+                <a href="{{ url_for('login_student') }}" style="color:var(--accent-primary); margin: 0 0.35rem; text-decoration:none; font-weight:600;">Student</a> &bull;
+                <a href="{{ url_for('login_counselor') }}" style="color:var(--accent-primary); margin: 0 0.35rem; text-decoration:none; font-weight:600;">Counselor</a> &bull;
+                <a href="{{ url_for('login_admin') }}" style="color:var(--accent-primary); margin: 0 0.35rem; text-decoration:none; font-weight:600;">Admin</a> &bull;
+                <a href="{{ url_for('register_counselor') }}" style="color:var(--accent-primary); margin: 0 0.35rem; text-decoration:none; font-weight:700;">Counselor Onboarding</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        let currentMode = 'login';
+        let currentRole = '{{ default_role or "student" }}';
+        window.addEventListener('DOMContentLoaded', () => { selectRole(currentRole); });
+
+        function toggleMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+            
+            const form = document.getElementById('auth-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const regFields = document.getElementById('reg-fields-box');
+            
+            if (mode === 'register') {
+                form.action = "{{ url_for('register') }}";
+                submitBtn.innerHTML = '<span>Create Account</span> <i class="fa-solid fa-user-plus"></i>';
+                regFields.style.display = 'block';
+                updateRoleView();
+            } else {
+                form.action = "{{ url_for('login') }}";
+                submitBtn.innerHTML = '<span>Login to Account</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+                regFields.style.display = 'none';
+            }
+        }
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('form-role').value = role;
+            
+            const buttons = document.querySelectorAll('.role-btn');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase() === role);
+            });
+            
+            updateRoleView();
+        }
+
+        function toggleAccountPurpose(val) {
+            const relGroup = document.getElementById('managing-rel-group');
+            if (relGroup) relGroup.style.display = (val === 'Dependent') ? 'block' : 'none';
+        }
+
+        function handleGenderSelect(val) {
+            const hint = document.getElementById('male-caregiver-hint');
+            if (hint) hint.style.display = (val === 'male') ? 'block' : 'none';
+        }
+
+        function updateRoleView() {
+            if (currentMode !== 'register') return;
+            
+            const emailGroup = document.getElementById('email-group');
+            const genderGroup = document.getElementById('gender-group');
+            const ageGroup = document.getElementById('age-group');
+            const specGroup = document.getElementById('specialization-group');
+            const condGroup = document.getElementById('conditions-group');
+            
+            const counselorCta = document.getElementById('counselor-reg-cta');
+            if (counselorCta) counselorCta.style.display = (currentRole === 'counselor') ? 'block' : 'none';
+
+            if (currentRole === 'counselor') {
+                emailGroup.style.display = 'block';
+                genderGroup.style.display = 'none';
+                ageGroup.style.display = 'none';
+                specGroup.style.display = 'block';
+                condGroup.style.display = 'none';
+            } else if (currentRole === 'admin') {
+                emailGroup.style.display = 'none';
+                genderGroup.style.display = 'none';
+                ageGroup.style.display = 'none';
+                specGroup.style.display = 'none';
+                condGroup.style.display = 'none';
+            } else { // Student / User
+                emailGroup.style.display = 'block';
+                genderGroup.style.display = 'block';
+                ageGroup.style.display = 'block';
+                specGroup.style.display = 'none';
+                condGroup.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

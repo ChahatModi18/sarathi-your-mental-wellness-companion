@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarathi - Counselor Console</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0c0a21;
+            --gradient-start: #0f0b24;
+            --gradient-end: #17113b;
+            --card-bg: rgba(23, 18, 56, 0.65);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --text-primary: #ffffff;
+            --text-secondary: #a5a1ca;
+            --accent-primary: #8c52ff;
+            --accent-secondary: #00e676;
+            --accent-alert: #ff1744;
+            --accent-warning: #ffea00;
+            --shadow-glow: 0 0 25px rgba(140, 82, 255, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 3rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo i {
+            color: var(--accent-primary);
+            text-shadow: var(--shadow-glow);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 2.2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, var(--accent-primary) 0%, #a275ff 100%);
+            border: none;
+            color: var(--text-primary);
+            padding: 0.65rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(140, 82, 255, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-approve {
+            background: linear-gradient(90deg, #00c853 0%, #00e676 100%);
+            box-shadow: 0 2px 10px rgba(0, 230, 118, 0.3);
+        }
+
+        .btn-approve:hover {
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.5);
+        }
+
+        .btn-reject {
+            background: linear-gradient(90deg, #d50000 0%, #ff1744 100%);
+            box-shadow: 0 2px 10px rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-reject:hover {
+            box-shadow: 0 4px 15px rgba(255, 23, 68, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .badge-pending { background: rgba(255, 234, 0, 0.12); border: 1px solid var(--accent-warning); color: #fffa79; }
+        .badge-approved { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent-secondary); color: #79ffb2; }
+        .badge-rejected { background: rgba(255, 23, 68, 0.15); border: 1px solid var(--accent-alert); color: #ffcbd4; }
+
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0, 230, 118, 0.15);
+            border: 1px solid var(--accent-secondary);
+            color: #b9ffd9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Counselor Control Console</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:1.5rem;">
+            <span>Welcome, <strong>{{ session.get('username') }}</strong></span>
+            <a href="{{ url_for('logout') }}" class="btn" style="background: rgba(255,255,255,0.05); box-shadow:none;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert">
+                        <i class="fa-solid fa-circle-check"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <h2 style="font-size: 1.4rem; margin-bottom: 1rem;"><i class="fa-solid fa-list-check"></i> Appointment Queues</h2>
+        
+        {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Date & Time</th>
+                        <th>Topic</th>
+                        <th>Reason for Session</th>
+                        <th>Current Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b_id, u_name, b_time, b_spec, b_reason, b_status in bookings %}
+                        <tr>
+                            <td><strong>{{ u_name }}</strong></td>
+                            <td>{{ b_time.strftime('%b %d, %Y %I:%M %p') }}</td>
+                            <td><span style="color:var(--text-secondary);">{{ b_spec }}</span></td>
+                            <td style="font-style:italic; font-size:0.9rem; color:var(--text-secondary); max-width:250px;">"{{ b_reason or 'No explanation provided' }}"</td>
+                            <td><span class="badge badge-{{ b_status.lower() }}">{{ b_status }}</span></td>
+                            <td>
+                                {% if b_status == 'Pending' %}
+                                    <div style="display:flex; gap:0.5rem;">
+                                        <form action="{{ url_for('counselor_dashboard') }}" method="POST" style="margin:0;">
+                                            <input type="hidden" name="booking_id" value="{{ b_id }}">
+                                            <input type="hidden" name="status" value="Approved">
+                                            <button type="submit" class="btn btn-approve"><i class="fa-solid fa-circle-check"></i> Approve</button>
+                                        </form>
+                                        <form action="{{ url_for('counselor_dashboard') }}" method="POST" style="margin:0;">
+                                            <input type="hidden" name="booking_id" value="{{ b_id }}">
+                                            <input type="hidden" name="status" value="Rejected">
+                                            <button type="submit" class="btn btn-reject"><i class="fa-solid fa-circle-xmark"></i> Reject</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span style="color:rgba(255,255,255,0.2); font-size:0.9rem;">Processed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align:center; padding:3rem; color:var(--text-secondary);">
+                <i class="fa-solid fa-calendar-xmark" style="font-size:2rem; margin-bottom:1rem;"></i>
+                <p>No booked sessions assigned to you yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Permitted Client Insights Section -->
+    <div class="card" id="permitted-clients" style="margin-top:2.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.2rem;">
+            <div>
+                <h2 style="font-size: 1.4rem; color:var(--text-primary); margin-bottom:0.3rem;">
+                    <i class="fa-solid fa-folder-open" style="color:var(--accent-primary);"></i> Permitted Client Clinical Records
+                </h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem; margin:0;">
+                    Clients who have granted temporary clinical consent for you to inspect their journal reflections, mood patterns, and psychometrics.
+                </p>
+            </div>
+        </div>
+
+        {% if permitted_clients %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client Username</th>
+                        <th>Consent Valid Until</th>
+                        <th>Days Remaining</th>
+                        <th>Permitted Scopes</th>
+                        <th>Client Focus Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p_id, u_id, u_name, p_until, can_j, can_s, can_w, p_notes, days_left in permitted_clients %}
+                        <tr>
+                            <td><strong style="font-size:1.05rem;">{{ u_name }}</strong></td>
+                            <td style="color:var(--accent-primary); font-weight:600;">{{ p_until.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <span class="badge" style="background:rgba(5,150,105,0.15); color:#059669; border:1px solid #059669;">
+                                    {{ days_left }} Days Left
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                                    {% if can_j %}<span class="badge" style="background:var(--accent-sage-light); color:var(--accent-primary);">Journals</span>{% endif %}
+                                    {% if can_s %}<span class="badge" style="background:var(--accent-sage-light); color:var(--accent-primary);">Screenings</span>{% endif %}
+                                    {% if can_w %}<span class="badge" style="background:var(--accent-sage-light); color:var(--accent-primary);">Wellness</span>{% endif %}
+                                </div>
+                            </td>
+                            <td style="font-style:italic; font-size:0.85rem; color:var(--text-secondary); max-width:200px;">
+                                "{{ p_notes or 'General clinical consultation' }}"
+                            </td>
+                            <td>
+                                <a href="{{ url_for('counselor_client_view', client_id=u_id) }}" class="btn" style="padding:0.45rem 0.95rem; font-size:0.85rem;">
+                                    <i class="fa-solid fa-eye"></i> Review Client History
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                <i class="fa-solid fa-lock" style="font-size:2rem; margin-bottom:0.8rem; opacity:0.6;"></i>
+                <p>No clients have granted open clinical consent at this moment.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Availability Slot Generator -->
+    <div class="card" style="margin-top:2.5rem; margin-bottom:3rem;">
+        <h2 style="font-size: 1.4rem; color:var(--text-primary); margin-bottom:1.2rem;">
+            <i class="fa-solid fa-calendar-plus" style="color:var(--accent-primary);"></i> My Availability Slots Manager
+        </h2>
+        
+        <form action="{{ url_for('counselor_dashboard') }}" method="POST" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:2rem; background:rgba(255,255,255,0.03); padding:1.2rem; border-radius:14px;">
+            <input type="hidden" name="action" value="add_slot">
+            <div style="flex:1; min-width:260px;">
+                <label style="font-size:0.88rem; color:var(--text-secondary); display:block; margin-bottom:0.4rem;">Select Date & Time for New Slot:</label>
+                <input type="datetime-local" name="slot_time" class="form-control" style="width:100%; padding:0.65rem 1rem; border-radius:10px; border:1px solid var(--card-border); background:rgba(0,0,0,0.2); color:white;" required>
+            </div>
+            <button type="submit" class="btn" style="padding:0.75rem 1.4rem;">
+                <i class="fa-solid fa-plus"></i> Publish Slot
+            </button>
+        </form>
+
+        <h3 style="font-size: 1.1rem; color:var(--text-primary); margin-bottom:0.8rem;">Published Slots</h3>
+        {% if slots %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Slot Time</th>
+                        <th>Availability Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s_id, s_time, s_avail in slots %}
+                        <tr>
+                            <td><i class="fa-regular fa-clock" style="color:var(--accent-primary);"></i> {{ s_time.strftime('%b %d, %Y %I:%M %p') }}</td>
+                            <td>
+                                {% if s_avail %}
+                                    <span class="badge" style="background:rgba(0,230,118,0.15); color:#79ffb2; border:1px solid #00e676;">Available for Booking</span>
+                                {% else %}
+                                    <span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-secondary);">Booked / Reserved</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color:var(--text-secondary); font-style:italic;">No slots created yet. Use the form above to add session openings.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Peer Support Forum — Sarathi Community{% endblock %}
+
+{% block style %}
+<style>
+    .forum-topbar {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+
+    .forum-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.5px;
+    }
+
+    .category-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .category-chip {
+        padding: 0.75rem 1.15rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-secondary);
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 600;
+        font-family: var(--font-main);
+        transition: all 0.25s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .category-chip:hover {
+        background: var(--accent-sage-light);
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+        transform: translateX(3px);
+    }
+
+    .category-chip.active {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(40, 75, 63, 0.2);
+    }
+
+    .tag-category {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        font-family: var(--font-main);
+        background: var(--accent-sage-light);
+        border: 1px solid var(--accent-primary);
+        color: var(--accent-primary);
+    }
+
+    .thread-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.6rem 1.8rem;
+        margin-bottom: 1.3rem;
+        box-shadow: var(--box-shadow-card);
+        transition: all 0.25s ease;
+    }
+
+    .thread-card:hover {
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(24, 38, 32, 0.06);
+    }
+
+    .thread-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.9rem;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .thread-meta {
+        font-size: 0.84rem;
+        color: var(--text-muted);
+        font-family: var(--font-main);
+    }
+
+    .forum-input {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 14px;
+        padding: 0.8rem 1.1rem;
+        color: var(--text-primary);
+        font-family: var(--font-main);
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+    }
+
+    .forum-input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 15px rgba(40, 75, 63, 0.14);
+    }
+
+    .forum-search-box {
+        position: relative;
+        margin-bottom: 1.4rem;
+    }
+
+    .forum-search-box input {
+        padding-left: 2.8rem;
+    }
+
+    .forum-search-box i {
+        position: absolute;
+        left: 1.1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* Thread Details Modal Sheet */
+    .thread-modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .thread-modal-backdrop.active {
+        display: flex;
+    }
+
+    .thread-modal-dialog {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        max-width: 680px;
+        width: 100%;
+        padding: 2.2rem;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+        .forum-title { font-size: 1.8rem; }
+        .forum-topbar { flex-direction: column; align-items: stretch; }
+        .thread-modal-dialog { padding: 1.3rem; border-radius: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="forum-topbar">
+    <div>
+        <h1 class="forum-title"><i class="fa-solid fa-comments" style="color:var(--accent-primary); margin-right:0.4rem;"></i> Peer Support Forum</h1>
+        <p style="color:var(--text-secondary); font-size:1.05rem; max-width:760px;">
+            A compassionate, moderated community space to share lived challenges anonymously, ask questions, and lift each other up with gentle wisdom.
+        </p>
+    </div>
+    
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <button class="btn" onclick="toggleForm()" style="padding:0.75rem 1.4rem;">
+            <i class="fa-solid fa-square-plus"></i> <span>Create New Post</span>
+        </button>
+    </div>
+</div>
+
+<div class="forum-layout">
+    <!-- Category Sidebar & Live Search -->
+    <div class="category-sidebar">
+        <!-- Live Instant Search -->
+        <div class="forum-search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="forumSearchInput" class="forum-input" placeholder="Search discussions..." oninput="filterPostsLive()">
+        </div>
+
+        <strong style="font-size:0.82rem; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); margin-bottom:0.4rem; display:block;">Community Spaces</strong>
+        
+        {% for cat in ['All', 'Student Life', 'Professional Work', 'Physical Health', 'Mental Health', 'Academic Stress', 'Relationships'] %}
+            <a href="{{ url_for('forum', category=cat) }}" class="category-chip {% if active_category == cat or (not active_category and cat == 'All') %}active{% endif %}">
+                <span>{{ cat }}</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; opacity:0.6;"></i>
+            </a>
+        {% endfor %}
+
+        <!-- Community Guidelines -->
+        <div class="card" style="margin-top:1.5rem; padding:1.2rem; background:var(--accent-sage-light); border-color:rgba(40, 75, 63, 0.15);">
+            <div style="font-weight:700; font-size:0.9rem; color:var(--accent-primary); margin-bottom:0.4rem;">
+                <i class="fa-solid fa-shield-heart"></i> Mindful Guidelines
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+                All peer reflections are anonymous. Treat every fellow traveler with patient empathy, active listening, and non-judgmental respect.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Threads Panel -->
+    <div>
+        <!-- Create Post Form Card (Hidden by default) -->
+        <div class="card" id="post-form-card" style="display:none; margin-bottom:1.8rem; animation: slideInUp 0.3s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.3rem;">
+                <h3 style="font-size:1.3rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fa-solid fa-feather" style="color:var(--accent-primary);"></i>
+                    <span>Share an Anonymous Reflection or Question</span>
+                </h3>
+                <button type="button" onclick="toggleForm()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" aria-label="Close Form">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form action="{{ url_for('forum') }}" method="POST">
+                <div class="forum-form-row">
+                    <div class="form-group">
+                        <label style="font-size:0.88rem; font-weight:600; color:var(--text-secondary);">Topic Title *</label>
+                        <input type="text" name="title" class="forum-input" placeholder="e.g., Navigating burnout before final semester exams..." required>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:0.88rem; font-weight:600; color:var(--text-secondary);">Category Space *</label>
+                        <select name="category" class="forum-input">
+                            <option value="Student Life">Student Life</option>
+                            <option value="Professional Work">Professional Work</option>
+                            <option value="Physical Health">Physical Health</option>
+                            <option value="Mental Health">Mental Health</option>
+                            <option value="Academic Stress">Academic Stress</option>
+                            <option value="Relationships">Relationships</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.4rem;">
+                    <label style="font-size:0.88rem; font-weight:600; color:var(--text-secondary);">Your Story or Question *</label>
+                    <textarea name="message" class="forum-input" placeholder="Describe what you are navigating. Your identity is protected and completely anonymous..." style="min-height:130px; resize:vertical;" required></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.8rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cancel</button>
+                    <button type="submit" class="btn">
+                        <span>Post Anonymously</span> <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Posts List -->
+        <div id="posts-list">
+            {% if posts %}
+                {% for title, user, category, message, timestamp in posts %}
+                    <div class="thread-card post-item" data-category="{{ category.lower() }}" data-title="{{ title.lower() }}" data-msg="{{ message.lower() }}">
+                        <div class="thread-header">
+                            <span class="tag-category">{{ category }}</span>
+                            <span class="thread-meta">
+                                <i class="fa-regular fa-clock"></i> {{ timestamp.strftime('%b %d, %Y') if timestamp and timestamp.strftime is defined else (timestamp or 'Recent') }} &bull; Asked by {{ user }}
+                            </span>
+                        </div>
+                        <h3 style="font-size:1.25rem; margin-bottom:0.6rem; color:var(--text-primary); cursor:pointer; line-height:1.35;" onclick="openThreadModal('{{ title|replace("'", "\\'") }}', '{{ category }}', '{{ user }}', '{{ message|replace("'", "\\'") }}')">
+                            {{ title }}
+                        </h3>
+                        <p style="color:var(--text-secondary); font-size:0.95rem; line-height:1.6; margin-bottom:1.1rem; white-space:pre-line;">
+                            {{ message[:240] }}{% if message|length > 240 %}...{% endif %}
+                        </p>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--card-border); padding-top:0.85rem; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-size:0.84rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+                                <i class="fa-regular fa-comments"></i> Peer Support Discussion
+                            </span>
+                            <button type="button" class="btn btn-secondary" style="font-size:0.85rem; padding:0.45rem 1rem;" onclick="openThreadModal('{{ title|replace("'", "\\'") }}', '{{ category }}', '{{ user }}', '{{ message|replace("'", "\\'") }}')">
+                                <span>Read Thread</span> <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="card" style="text-align:center; padding:4.5rem 2rem;">
+                    <i class="fa-solid fa-comments" style="font-size:2.8rem; color:var(--text-muted); margin-bottom:1.2rem; display:block;"></i>
+                    <h3 style="font-size:1.25rem; color:var(--text-primary); font-weight:700; margin-bottom:0.4rem;">No discussions in this space yet</h3>
+                    <p style="font-size:0.95rem; color:var(--text-secondary); max-width:440px; margin:0 auto 1.5rem auto;">Be the courageous first voice to share your thoughts and begin a supportive dialogue.</p>
+                    <button class="btn" onclick="toggleForm()">
+                        <i class="fa-solid fa-feather"></i> <span>Start Conversation</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Thread Details Modal -->
+<div class="thread-modal-backdrop" id="threadModal" onclick="closeThreadModal(event)">
+    <div class="thread-modal-dialog" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+            <span class="tag-category" id="modalCategory">Category</span>
+            <button onclick="closeThreadModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.3rem;" aria-label="Close Modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <h2 id="modalTitle" style="font-size:1.5rem; color:var(--text-primary); margin-bottom:0.5rem; line-height:1.3;">Title</h2>
+        <div id="modalMeta" style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.3rem;">Asked by Anonymous Student &bull; Community Peer Support</div>
+        <div id="modalMessage" style="font-size:1rem; color:var(--text-secondary); line-height:1.75; white-space:pre-line; background:var(--chip-bg); border:1px solid var(--card-border); padding:1.4rem; border-radius:16px; margin-bottom:1.6rem;">
+            Message
+        </div>
+
+        <!-- Supportive Voice / Reply Section -->
+        <div style="border-top:1px solid var(--card-border); padding-top:1.3rem;">
+            <strong style="font-size:0.95rem; color:var(--text-primary); display:block; margin-bottom:0.7rem;">
+                <i class="fa-solid fa-hand-holding-heart" style="color:var(--accent-secondary); margin-right:0.3rem;"></i> Send a Gentle Word of Encouragement
+            </strong>
+            <textarea id="modalReplyText" class="forum-input" placeholder="Offer your supportive reflection, empathy, or comforting perspective..." style="min-height:85px; resize:vertical; margin-bottom:0.9rem;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:0.8rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="closeThreadModal()">Close</button>
+                <button type="button" class="btn" onclick="sendPeerSupportEncouragement()">
+                    <span>Send Kindness</span> <i class="fa-solid fa-heart"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function toggleForm() {
+        const card = document.getElementById('post-form-card');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        if (card.style.display === 'block') {
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function filterPostsLive() {
+        const query = document.getElementById('forumSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.post-item');
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title') || '';
+            const msg = card.getAttribute('data-msg') || '';
+            const cat = card.getAttribute('data-category') || '';
+            if (!query || title.includes(query) || msg.includes(query) || cat.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function openThreadModal(title, category, author, message) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalCategory').innerText = category;
+        document.getElementById('modalMeta').innerText = `Asked by ${author} • Community Peer Support`;
+        document.getElementById('modalMessage').innerText = message;
+        document.getElementById('threadModal').classList.add('active');
+    }
+
+    function closeThreadModal(event) {
+        if (!event || event.target.id === 'threadModal' || event.target.closest('button')) {
+            document.getElementById('threadModal').classList.remove('active');
+        }
+    }
+
+    function sendPeerSupportEncouragement() {
+        const replyInput = document.getElementById('modalReplyText');
+        const text = replyInput.value.trim();
+        if (!text) {
+            alert("Please type a gentle thought of encouragement before sending.");
+            return;
+        }
+        alert("Thank you! Your compassionate encouragement has been shared with your peer.");
+        replyInput.value = '';
+        closeThreadModal();
+    }
+</script>
+{% endblock %}
