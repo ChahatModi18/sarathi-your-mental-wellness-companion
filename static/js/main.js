@@ -412,8 +412,13 @@ function startVoiceDictation(targetInputId, micButtonId) {
  * ==============================================================================
  */
 function initSarathiVoiceBot() {
-    // Only show voicebot on authenticated application pages, not on login/register pages
-    if (window.location.pathname === '/login' || window.location.pathname === '/register') return;
+    // Strictly adhere to AGENTS.md Section 2.7: Never render or listen on /login, /register, or auth portals
+    const path = (window.location.pathname || '').toLowerCase();
+    if (path.includes('/login') || path.includes('/register') || document.querySelector('.auth-card') || document.querySelector('#loginForm') || document.querySelector('#registerForm')) {
+        const existing = document.getElementById('sarathi-voicebot-root');
+        if (existing) existing.remove();
+        return;
+    }
     if (document.getElementById('sarathi-voicebot-root')) return;
 
     const root = document.createElement('div');
