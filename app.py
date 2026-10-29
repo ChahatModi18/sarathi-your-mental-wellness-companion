@@ -125,15 +125,11 @@ SPIN_MESSAGES = [
 ]
 
 
-# Database configuration and pooling
-def get_db_connection():
-    db_password = os.environ.get("DB_PASSWORD", os.environ.get("MYSQL_PASSWORD", os.environ.get("chahat", "chahat")))
-    return mysql.connector.connect(
-        host=os.environ.get("DB_HOST", "localhost"),
-        user=os.environ.get("DB_USER", "root"),
-        password=db_password,
-        database=os.environ.get("DB_NAME", "sarathi_sih_db")
-    )
+# Database configuration and pooling with transparent MySQL & Serverless/SQLite fallback
+try:
+    from db_adapter import get_db_connection
+except ImportError:
+    from backend.db_adapter import get_db_connection
 
 def hash_password(password, username=""):
     salt = "sarathi_secure_pepper_1294_$"

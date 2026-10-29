@@ -13,14 +13,10 @@ def hash_password(password, username=""):
     combined = password + salt + username.lower()
     return hashlib.sha256(combined.encode('utf-8')).hexdigest()
 
-def get_db_connection():
-    db_password = os.environ.get("DB_PASSWORD", os.environ.get("MYSQL_PASSWORD", os.environ.get("chahat", "chahat")))
-    return mysql.connector.connect(
-        host=os.environ.get("DB_HOST", "localhost"),
-        user=os.environ.get("DB_USER", "root"),
-        password=db_password,
-        database=os.environ.get("DB_NAME", "sarathi_sih_db")
-    )
+try:
+    from db_adapter import get_db_connection
+except ImportError:
+    from backend.db_adapter import get_db_connection
 
 def init_db():
     db_password = os.environ.get("chahat", "chahat")
