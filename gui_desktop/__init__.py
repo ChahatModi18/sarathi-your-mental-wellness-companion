@@ -1,2 +1,0 @@
-# gui_desktop package
-

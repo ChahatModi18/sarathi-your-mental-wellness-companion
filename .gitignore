@@ -90,3 +90,8 @@ todo_*.json
 *.keras
 
 .vercel
+
+# Desktop GUI artifacts
+gui_desktop/
+desktop_app/
+requirements-desktop.txt
