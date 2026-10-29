@@ -90,3 +90,4 @@ git ls-files
 
 > [!NOTE]
 > All local development databases, `.log` files, virtual environment folders (`Lib/`, `Scripts/`), and personal notes remain safe on your local disk and will never be pushed to GitHub due to `.gitignore` exclusions.
+
